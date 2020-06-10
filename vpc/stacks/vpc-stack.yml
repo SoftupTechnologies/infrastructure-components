@@ -6,6 +6,10 @@ Parameters:
   Environment:
     Description: Name of the stack environment
     Type: String
+    AllowedValues:
+      - dev
+      - stage
+      - prod
   VpcCIDR:
     Description: IP range for this VPC
     Type: String
