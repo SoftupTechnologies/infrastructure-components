@@ -25,17 +25,17 @@ Resources:
     Properties:
       CidrBlock: !Ref VpcCIDR
       EnableDnsSupport: true
-      EnableDnsHostNames: true
+      EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: !Ref EnvironmentName
+          Value: !Ref Env
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: !Ref EnvironmentName
+          Value: !Ref Env
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -50,11 +50,12 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select 
         - 0
-        - !GetAZs 'AWS::Region'
+        - !GetAZs 
+          Ref: 'AWS::Region'
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${ENV} Public Subnet (AZ1)
+          Value: !Sub ${Env} Public Subnet (AZ1)
 
   PrivateSubnet:
     Type: AWS::EC2::Subnet
@@ -63,11 +64,12 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select 
         - 0
-        - !GetAZs 'AWS::Region'
+        - !GetAZs 
+          Ref: 'AWS::Region'
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${ENV} Private Subnet (AZ1)
+          Value: !Sub ${Env} Private Subnet (AZ1)
 
   NatGatewayEIP:
     Type: AWS::EC2::EIP
@@ -89,7 +91,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName} Public Routes
+          Value: !Sub ${Env} Public Routes
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -111,7 +113,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${ENV} Private Routes (AZ1)
+          Value: !Sub ${Env} Private Routes (AZ1)
 
   DefaultPrivateRoute:
     Type: AWS::EC2::Route
