@@ -38,10 +38,20 @@ Resources:
             Resource: !Sub arn:aws:s3:::${WebAppBucket}/*
 
 Outputs:
+  WebAppBucket:
+    Description: Webapp bucket id
+    Value: !Ref WebAppBucket
+    Export:
+      Name: WebAppBucket
+
   DomainName:
     Description: Bucket domain name
     Value: !GetAtt WebAppBucket.DomainName
+    Export:
+      Name: DomainName
   
   WebsiteUrl:
     Description: Bucket website url
     Value: !GetAtt WebAppBucket.WebsiteURL
+    Export:
+      Name: WebsiteUrl
