@@ -24,3 +24,8 @@ Outputs:
     Value: !Ref CloudFrontOriginAccessIdentity
     Export:
       Name: CloudFrontOriginAccessIdentity
+
+  S3CanonicalUserId:
+    Value: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+    Export:
+      Name: S3CanonicalUserId
