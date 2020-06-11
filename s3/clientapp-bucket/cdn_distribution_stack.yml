@@ -25,7 +25,7 @@ Resources:
             S3OriginConfig:
               OriginAccessIdentity: !Sub
                 - origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
-                - { CloudFrontOriginAccessIdentity: !ImportValue CloudFrontOriginAccessIdentity}
+                - { CloudFrontOriginAccessIdentity: !ImportValue CloudFrontOriginAccessIdentity }
         DefaultRootObject: index.html
         DefaultCacheBehavior:
           TargetOriginId: !ImportValue WebAppBucket
