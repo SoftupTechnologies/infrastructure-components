@@ -8,10 +8,24 @@ Parameters:
   Environment:
     Description: Name of the stack environment
     Type: String
+    AllowedValues:
+      - dev
+      - stage
+      - prod
 
 Resources:
   ArtifactsBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${ProjectName}-artifacts-${Environment}
-    DeletionPolicy: Retain
+      PublicAccessBlockConfiguration: 
+        RestrictPublicBuckets: true
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+    DeletionPolicy: Delete
+
+Outputs:
+  BucketName:
+    Value: !Ref 'ArtifactsBucket'
+    Description: Bucket that holds authorized keys
