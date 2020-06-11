@@ -117,7 +117,7 @@ Resources:
       AllocationId: !GetAtt NatEipA.AllocationId
       SubnetId: !Ref PublicSubnetA
       Tags:
-        - Key: Name
+        - Key: NameE
           Value: !Sub ${VpcName}-nat-gateway-a-${Environment}
 
   NatGatewayB:
@@ -221,6 +221,8 @@ Outputs:
   PrivateSubnets:
     Description: Private subnet in two AZ
     Value: !Join [ ",", [ !Ref PrivateSubnetA, !Ref PrivateSubnetB ]]
+    Export:
+      Name: PrivateSubnets
 
   NoIngressSecurityGroup:
     Description: Security group with no ingress rule
