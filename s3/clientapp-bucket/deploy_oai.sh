@@ -1,12 +1,12 @@
 #!/bin/bash
 
-BUCKET_NAME=$1
+OAI_COMMENT=$1
 ENVIRONMENT=$2
 AWS_REGION='eu-central-1'
 
 aws cloudformation deploy \
-  --template-file ./client_app_bucket.yml \
+  --template-file ./cdn_cf_origin_access_identity.yml \
   --region $AWS_REGION \
   --stack-name $BUCKET_NAME-s3-client-app-$ENVIRONMENT \
-  --parameter-overrides BucketName=$BUCKET_NAME \
+  --parameter-overrides OAIComment=$OAI_COMMENT \
                         Environment=$ENVIRONMENT

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+OAI_COMMENT=$1
+BUCKET_NAME=$2
+DISTRIBUTION_NAME=$3
+ENVIRONMENT=$4
+
+AWS_REGION='eu-central-1'
+
+./deploy_oai.sh $OAI_COMMENT ENVIRONMENT
+./deploy_s3.sh $BUCKET_NAME ENVIRONMENT
+./deploy_distribution.sh $DISTRIBUTION_NAME ENVIRONMENT
+

@@ -14,16 +14,8 @@ Parameters:
       - prod
 
 Resources:
-  CloudFrontOriginAccessIdentity:
-    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
-    Properties:
-      CloudFrontOriginAccessIdentityConfig:
-        Comment: CF origin access id
-
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
-    DependsOn:
-      - CloudFrontOriginAccessIdentity
     Properties:
       DistributionConfig:
         Enabled: 'true'
@@ -31,7 +23,9 @@ Resources:
           - DomainName: !ImportValue DomainName
             Id: !ImportValue WebAppBucket
             S3OriginConfig:
-              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+              OriginAccessIdentity: !Sub
+                - origin-access-identity/cloudfront/${CloudFrontOriginAccessIdentity}
+                - { CloudFrontOriginAccessIdentity: !ImportValue CloudFrontOriginAccessIdentity}
         DefaultRootObject: index.html
         DefaultCacheBehavior:
           TargetOriginId: !ImportValue WebAppBucket

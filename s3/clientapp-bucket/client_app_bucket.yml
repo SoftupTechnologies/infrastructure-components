@@ -33,7 +33,10 @@ Resources:
         Statement:
           - Sid: PublicReadForGetBucketObjects
             Effect: Allow
-            Principal: '*'
+            Principal:
+              AWS: !Sub 
+                - arn:aws:iam::cloudfront:user/${CloudFrontOriginAccessIdentity}
+                - { CloudFrontOriginAccessIdentity: !ImportValue CloudFrontOriginAccessIdentity}
             Action: 's3:GetObject'
             Resource: !Sub arn:aws:s3:::${WebAppBucket}/*
 
