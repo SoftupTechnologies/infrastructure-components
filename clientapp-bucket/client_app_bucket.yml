@@ -33,8 +33,7 @@ Resources:
         Statement:
           - Sid: PublicReadForGetBucketObjects
             Effect: Allow
-            Principal:
-              CanonicalUser: !ImportValue S3CanonicalUserId
+            Principal: '*'
             Action: 's3:GetObject'
             Resource: !Sub arn:aws:s3:::${WebAppBucket}/*
 
