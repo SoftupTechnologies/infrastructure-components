@@ -82,6 +82,10 @@ Resources:
           FromPort: !Ref DBPort
           ToPort: !Ref DBPort
           SourceSecurityGroupId: !Ref DBClientSecurityGroup
+        - IpProtocol: tcp
+          FromPort: !Ref DBPort
+          ToPort: !Ref DBPort
+          SourceSecurityGroupId: sg-05bc5fad48dbc6a75 # This needs to be updated after bastion host is created via Cloudformation
 
 Outputs:
   ClientSecurityGroup:
