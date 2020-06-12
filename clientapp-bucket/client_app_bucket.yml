@@ -1,0 +1,58 @@
+---
+Parameters:
+  BucketName:
+    Description: Name of the bucket
+    Type: String
+
+  Environment:
+    Description: Environment
+    Type: String
+    AllowedValues:
+      - dev
+      - stage
+      - prod
+
+Resources:
+  WebAppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${BucketName}-s3-bucket-${Environment}
+      AccessControl: PublicRead
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn:
+      - WebAppBucket
+    Properties:
+      Bucket: !Ref WebAppBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal:
+              CanonicalUser: !ImportValue S3CanonicalUserId
+            Action: 's3:GetObject'
+            Resource: !Sub arn:aws:s3:::${WebAppBucket}/*
+
+Outputs:
+  WebAppBucket:
+    Description: Webapp bucket id
+    Value: !Ref WebAppBucket
+    Export:
+      Name: WebAppBucket
+
+  DomainName:
+    Description: Bucket domain name
+    Value: !GetAtt WebAppBucket.DomainName
+    Export:
+      Name: DomainName
+  
+  WebsiteUrl:
+    Description: Bucket website url
+    Value: !GetAtt WebAppBucket.WebsiteURL
+    Export:
+      Name: WebsiteUrl

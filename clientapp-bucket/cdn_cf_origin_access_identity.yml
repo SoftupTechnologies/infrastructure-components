@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  OAIComment:
+    Type: String
+    Default: CF origin access id
+  
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - stage
+      - prod
+
+Resources:
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Sub ${OAIComment}-oai-${Environment}
+
+Outputs:
+  CloudFrontOriginAccessIdentity:
+    Value: !Ref CloudFrontOriginAccessIdentity
+    Export:
+      Name: CloudFrontOriginAccessIdentity
+
+  S3CanonicalUserId:
+    Value: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+    Export:
+      Name: S3CanonicalUserId

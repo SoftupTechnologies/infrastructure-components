@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  DistributionName:
+    Type: String
+    Description: Distribution name
+
+  Environment:
+    Type: String
+    Description: Environment name
+    AllowedValues:
+      - dev
+      - stage
+      - prod
+
+Resources:
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: 'true'
+        Origins:
+          - DomainName: !ImportValue DomainName
+            Id: !ImportValue WebAppBucket
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: match-viewer
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: !ImportValue WebAppBucket
+          ViewerProtocolPolicy: allow-all
+          AllowedMethods:
+            - HEAD
+            - GET
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          DefaultTTL: 300
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: 'true'
+      Tags:
+        - Key: Name
+          Value: !Sub ${DistributionName}-cloud-front-distribution-${Environment}
+
+Outputs:
+  CFDomainName:
+    Description: CloudFront domain name
+    Value: !GetAtt CloudFrontDistribution.DomainName
