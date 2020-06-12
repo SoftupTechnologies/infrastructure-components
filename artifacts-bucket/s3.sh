@@ -10,7 +10,7 @@ aws cloudformation deploy \
   --region $AWS_REGION \
   --profile ${AWS_PROFILE:-default} \
   --template-file ./stacks/s3-stack.yml \
-  --stack-name $PROJECT_NAME-bucket-artifacts-bucket-$ENVIRONMENT \
+  --stack-name $PROJECT_NAME-bucket-artifacts-$ENVIRONMENT \
   --no-fail-on-empty-changeset \
   --parameter-overrides Environment=$ENVIRONMENT \
                         ProjectName=$PROJECT_NAME
