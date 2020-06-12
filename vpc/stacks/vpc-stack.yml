@@ -217,6 +217,8 @@ Outputs:
   PublicSubnets:
     Description: Public subnets in two AZ
     Value: !Join [ ",", [ !Ref PublicSubnetA, !Ref PublicSubnetB ]]
+    Export:
+      Name: PublicSubnets
 
   PrivateSubnets:
     Description: Private subnet in two AZ

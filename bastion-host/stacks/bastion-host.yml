@@ -1,0 +1,89 @@
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  InstanceName:
+    Type: String
+    Description: Name for the bastion instance
+  Environment:
+    Type: String
+    AllowedValues:
+      - dev
+      - stage
+      - prod
+  
+Resources:
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables SSH Access to Bastion Hosts
+      VpcId: !ImportValue VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+      
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: t2.micro
+      SecurityGroupIds:
+        - !Ref BastionSecurityGroup
+      SubnetId: !Select [0, !ImportValue PublicSubnets]
+      Tags:
+        -
+          Key: Name
+          Value: !Sub ${InstanceName}-bastion-instance-${Environment}
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            sudo yum install -y ec2-instance-connect
+
+  EC2InstanceConnectRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS:
+                - Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+            Action: "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - !Ref EC2InstanceConnectCLIPolicy
+
+  EC2InstanceConnectCLIPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: Policy to connect to an instance using EC2 Instance Connect CLI
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - ec2-instance-connect:SendSSHPublicKey
+            Effect: Allow
+            Resource:
+              Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${BastionInstance}
+            Condition:
+              StringEquals:
+                ec2:osuser: "ec2-user"
+          - Action:
+              - ec2:DescribeInstances
+            Effect: Allow
+            Resource: "*"
+
+Outputs:
+  BastionInstance:
+    Value: !Ref BastionInstance
+    Export:
+      Name: BastionInstance
+
+  EC2InstanceConnectRole:
+    Value: !Ref EC2InstanceConnectRole
+    Export:
+      Name: EC2InstanceConnectRole
