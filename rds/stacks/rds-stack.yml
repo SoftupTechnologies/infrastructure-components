@@ -1,63 +1,28 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "AWS CloudFormation Sample Template for creating an Amazon RDS DB instance:
-  **WARNING** This template creates an RDS DB instance. You will be billed for the AWS 
-  resources used if you create a stack from this template."
+Description: RDS DB
 
 Parameters:
-  DBInstanceID:
-    Default: mydbinstance
-    Description: My database instance
-    Type: String
-    MinLength: '1'
-    MaxLength: '63'
-    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
-    ConstraintDescription: Must begin with a letter and must not end with a hyphen or contain two consecutive hyphens.
-
-  DBName:
-    Default: mydb
-    Description: My database
-    Type: String
-    MinLength: '1'
-    MaxLength: '64'
-    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
-    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
-
-  DBInstanceClass:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  Subnets:
+    Description: List of private subnet groups
+    Type: List<AWS::EC2::Subnet::Id>
+  InstanceType:
     Default: db.t2.micro
-    Description: DB instance class
+    Description: Instance type
     Type: String
-    ConstraintDescription: Must select a valid DB instance type.
-
-  DBAllocatedStorage:
-    Default: '5'
-    Description: The size of the database (GiB)
-    Type: Number
-    MinValue: '5'
-    MaxValue: '1024'
-    ConstraintDescription: must be between 5 and 1024 GiB.
-
   DBUsername:
     NoEcho: 'true'
     Description: Username for PostgreSQL database access
     Type: String
-    MinLength: '1'
-    MaxLength: '16'
-    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
-    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
-
   DBPassword:
     NoEcho: 'true'
     Description: Password PostgreSQL database access
     Type: String
-    MinLength: '8'
-    MaxLength: '41'
-    AllowedPattern: '[a-zA-Z0-9]*'
-    ConstraintDescription: must contain only alphanumeric characters.
-
-  Subnets:
-    Type: CommaDelimitedList
-    Description: Database's Subnets
-
+  DBPort:
+    Description: The database port
+    Type: String
+    Default: 5432
   Environment:
     Description: Name of the stack environment
     Type: String
@@ -66,28 +31,63 @@ Parameters:
       - stage
       - prod
 
+Conditions:
+  isProd: !Equals [ !Ref Environment, prod ]
+
 Resources:
   MyDB:
     Type: 'AWS::RDS::DBInstance'
     DependsOn: MyDBSubnetGroup
     Properties:
-      DBInstanceIdentifier: !Ref DBInstanceID
-      DBName: !Ref DBName
-      DBInstanceClass: !Ref DBInstanceClass
-      AllocatedStorage: !Ref DBAllocatedStorage
+      DBInstanceIdentifier: !Sub ${AWS::StackName}-master
+      DBName: projectdb
+      DBInstanceClass: !Ref InstanceType
+      AllocatedStorage: !If [ isProd, 20, 5]
       Engine: postgres
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
+      Port: !Ref DBPort
       BackupRetentionPeriod: 1
       DBSubnetGroupName: !Ref MyDBSubnetGroup
+      PubliclyAccessible: 'false'
+      VPCSecurityGroups: 
+        - !GetAtt DBEC2SecurityGroup.GroupId
       Tags: 
         - 
           Key: Name
-          Value: !Sub ${DBName}-rds-${Environment}
+          Value: !Sub ${AWS::StackName}
 
   MyDBSubnetGroup:
     Type: "AWS::RDS::DBSubnetGroup"
     Properties: 
-      DBSubnetGroupName: !Sub ${DBName}-SubnetGroupName
+      DBSubnetGroupName: !Sub ${AWS::StackName}-subnet-group
       DBSubnetGroupDescription: description
-      SubnetIds: !Ref Subnets  
+      SubnetIds: !Ref Subnets
+  
+  DBClientSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${AWS::StackName}-client
+      GroupDescription: "Security group that can be used by clients to access DB (ie lambdas)"
+      VpcId: !Ref VpcId
+  
+  DBEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${AWS::StackName}-ingress
+      GroupDescription: "Enables access to the catalog database from outside"
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref DBPort
+          ToPort: !Ref DBPort
+          SourceSecurityGroupId: !Ref DBClientSecurityGroup
+
+Outputs:
+  ClientSecurityGroup:
+    Value: !Ref DBClientSecurityGroup
+    Description: Security group required to access RDS
+  MasterAddress:
+    Value: !GetAtt MyDB.Endpoint.Address
+  MasterPort:
+    Value: !GetAtt MyDB.Endpoint.Port
