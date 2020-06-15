@@ -84,6 +84,7 @@ Resources:
       ImageId: !Ref LatestAmiId
       IamInstanceProfile: !Ref BastionInstanceProfile
       InstanceType: t2.micro
+      KeyName: serverless-bastion-host
       SecurityGroupIds:
         - !Ref BastionSecurityGroup
       SubnetId: !ImportValue PublicSubnetA
@@ -126,7 +127,7 @@ Resources:
                   /usr/sbin/adduser $USER_NAME && \
                   mkdir -m 700 /home/$USER_NAME/.ssh && \
                   chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh && \
-                  echo "$line" >> ~/keys_installed && \
+                  echo "$line" >> ~/keys_installed
                 fi
 
                 # Copy the public key from S3, if a user account was created 
@@ -160,7 +161,7 @@ Resources:
             chmod 700 /usr/bin/bastion/sync_users
 
             cat > ~/mycron << EOF
-            */5 * * * * /usr/bin/bastion/sync_users
+            */3 * * * * /usr/bin/bastion/sync_users
             0 0 * * * yum -y update --security
             EOF
             crontab ~/mycron
