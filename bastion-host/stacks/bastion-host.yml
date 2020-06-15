@@ -64,6 +64,9 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${InstanceName}-sg-${Environment}
 
   BastionInstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -84,7 +87,6 @@ Resources:
       SecurityGroupIds:
         - !Ref BastionSecurityGroup
       SubnetId: !ImportValue PublicSubnetA
-      KeyName: serverless-bastion-host
       Tags:
         -
           Key: Name
@@ -169,3 +171,8 @@ Outputs:
     Value: !Ref BastionInstance
     Export:
       Name: BastionInstance
+
+  BastionSecurityGroup:
+    Value: !Ref BastionSecurityGroup
+    Export:
+      Name: BastionSecurityGroup
