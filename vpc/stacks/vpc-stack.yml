@@ -213,6 +213,13 @@ Outputs:
   VPC:
     Description: A reference to the created VPC
     Value: !Ref VPC
+    Export:
+      Name: VPC
+
+  PublicSubnetA:
+    Value: !Ref PublicSubnetA
+    Export:
+      Name: PublicSubnetA
 
   PublicSubnets:
     Description: Public subnets in two AZ

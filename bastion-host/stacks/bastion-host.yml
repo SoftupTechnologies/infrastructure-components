@@ -1,4 +1,10 @@
+AWSTemplateFormatVersion: 2010-09-09
+
 Parameters:
+  PubKeysBucketName:
+    Type: String
+    Description: Name of public keys bucket
+    Default: bastion-host-public-keys
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
@@ -13,6 +19,41 @@ Parameters:
       - prod
   
 Resources:
+  PublicKeysBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${PubKeysBucketName}-s3-bucket-${Environment}
+      AccessControl: Private
+
+  EC2RoleToReadFromBucket:
+    Type: AWS::IAM::Role
+    DependsOn:
+      - PublicKeysBucket
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: bastion-s3-read
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt PublicKeysBucket.Arn
+                  - !Sub 
+                    - ${BucketArn}/*
+                    - { BucketArn: !GetAtt PublicKeysBucket.Arn }
+
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -23,15 +64,26 @@ Resources:
           FromPort: '22'
           ToPort: '22'
           CidrIp: 0.0.0.0/0
+
+  BastionInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    DependsOn:
+      - EC2RoleToReadFromBucket
+    Properties:
+      Roles:
+        - !Ref EC2RoleToReadFromBucket
       
   BastionInstance:
     Type: AWS::EC2::Instance
+    DependsOn:
+      - BastionInstanceProfile
     Properties:
       ImageId: !Ref LatestAmiId
+      IamInstanceProfile: !Ref BastionInstanceProfile
       InstanceType: t2.micro
       SecurityGroupIds:
         - !Ref BastionSecurityGroup
-      SubnetId: !Select [0, !ImportValue PublicSubnets]
+      SubnetId: !ImportValue PublicSubnetA
       Tags:
         -
           Key: Name
@@ -40,42 +92,42 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash
-            sudo yum install -y ec2-instance-connect
+            
 
-  EC2InstanceConnectRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              AWS:
-                - Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
-            Action: "sts:AssumeRole"
-      Path: "/"
-      ManagedPolicyArns:
-        - !Ref EC2InstanceConnectCLIPolicy
+  # EC2InstanceConnectRole:
+  #   Type: "AWS::IAM::Role"
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: "Allow"
+  #           Principal:
+  #             AWS:
+  #               - Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+  #           Action: "sts:AssumeRole"
+  #     Path: "/"
+  #     ManagedPolicyArns:
+  #       - !Ref EC2InstanceConnectCLIPolicy
 
-  EC2InstanceConnectCLIPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      Description: Policy to connect to an instance using EC2 Instance Connect CLI
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Action:
-              - ec2-instance-connect:SendSSHPublicKey
-            Effect: Allow
-            Resource:
-              Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${BastionInstance}
-            Condition:
-              StringEquals:
-                ec2:osuser: "ec2-user"
-          - Action:
-              - ec2:DescribeInstances
-            Effect: Allow
-            Resource: "*"
+  # EC2InstanceConnectCLIPolicy:
+  #   Type: AWS::IAM::ManagedPolicy
+  #   Properties:
+  #     Description: Policy to connect to an instance using EC2 Instance Connect CLI
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Action:
+  #             - ec2-instance-connect:SendSSHPublicKey
+  #           Effect: Allow
+  #           Resource:
+  #             Fn::Sub: arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/${BastionInstance}
+  #           Condition:
+  #             StringEquals:
+  #               ec2:osuser: "ec2-user"
+  #         - Action:
+  #             - ec2:DescribeInstances
+  #           Effect: Allow
+  #           Resource: "*"
 
 Outputs:
   BastionInstance:
@@ -83,7 +135,7 @@ Outputs:
     Export:
       Name: BastionInstance
 
-  EC2InstanceConnectRole:
-    Value: !Ref EC2InstanceConnectRole
-    Export:
-      Name: EC2InstanceConnectRole
+  # EC2InstanceConnectRole:
+  #   Value: !Ref EC2InstanceConnectRole
+  #   Export:
+  #     Name: EC2InstanceConnectRole
