@@ -11,6 +11,12 @@ Parameters:
     Default: db.t2.micro
     Description: Instance type
     Type: String
+  ProjectName:
+    Description: Name of the project
+    Type: String
+  ClientName:
+    Description: Client name
+    Type: String
   DBUsername:
     NoEcho: 'true'
     Description: Username for PostgreSQL database access
@@ -53,9 +59,12 @@ Resources:
       VPCSecurityGroups: 
         - !GetAtt DBEC2SecurityGroup.GroupId
       Tags: 
-        - 
-          Key: Name
+        - Key: Name
           Value: !Sub ${AWS::StackName}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   MyDBSubnetGroup:
     Type: "AWS::RDS::DBSubnetGroup"
@@ -63,6 +72,11 @@ Resources:
       DBSubnetGroupName: !Sub ${AWS::StackName}-subnet-group
       DBSubnetGroupDescription: description
       SubnetIds: !Ref Subnets
+      Tags: 
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
   
   DBClientSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -70,6 +84,11 @@ Resources:
       GroupName: !Sub ${AWS::StackName}-client
       GroupDescription: "Security group that can be used by clients to access DB (ie lambdas)"
       VpcId: !Ref VpcId
+      Tags: 
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
   
   DBEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -86,6 +105,11 @@ Resources:
           FromPort: !Ref DBPort
           ToPort: !Ref DBPort
           SourceSecurityGroupId: !ImportValue BastionSecurityGroup
+      Tags: 
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
 Outputs:
   ClientSecurityGroup:
