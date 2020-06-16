@@ -2,10 +2,10 @@ import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
 
 export class ArtifactsBucketStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const bucketName = new cdk.CfnParameter(this, 'BucketName', {
+    const bucketName = new cdk.CfnParameter(this, 'ArtifactBucketName', {
       type: 'string',
     })
     const env = new cdk.CfnParameter(this, 'Environment', {
@@ -19,7 +19,7 @@ export class ArtifactsBucketStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     })
 
-    new cdk.CfnOutput(this, 'BucketName', {
+    new cdk.CfnOutput(this, 'ArtifactBucketName', {
       exportName: 'ArtifactBucketName',
       value: bucket.bucketName,
     })

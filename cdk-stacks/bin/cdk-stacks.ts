@@ -5,3 +5,5 @@ import { ArtifactsBucketStack } from '../lib/artifacts-bucket'
 
 const app = new cdk.App();
 new ArtifactsBucketStack(app, 'ArtifactsBucketStack');
+
+app.synth();
