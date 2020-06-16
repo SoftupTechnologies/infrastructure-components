@@ -5,6 +5,12 @@ Parameters:
     Type: String
     Description: Name of public keys bucket
     Default: bastion-host-public-keys
+  ProjectName:
+    Description: Name of the project
+    Type: String
+  ClientName:
+    Description: Client name
+    Type: String
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
@@ -24,6 +30,11 @@ Resources:
     Properties:
       BucketName: !Sub ${PubKeysBucketName}-s3-bucket-${Environment}
       AccessControl: Private
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   EC2RoleToReadFromBucket:
     Type: AWS::IAM::Role
@@ -53,6 +64,11 @@ Resources:
                   - !Sub 
                     - ${BucketArn}/*
                     - { BucketArn: !GetAtt PublicKeysBucket.Arn }
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -67,6 +83,10 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${InstanceName}-sg-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   BastionInstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -75,6 +95,11 @@ Resources:
     Properties:
       Roles:
         - !Ref EC2RoleToReadFromBucket
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
       
   BastionInstance:
     Type: AWS::EC2::Instance
@@ -89,9 +114,12 @@ Resources:
         - !Ref BastionSecurityGroup
       SubnetId: !ImportValue PublicSubnetA
       Tags:
-        -
-          Key: Name
+        - Key: Name
           Value: !Sub ${InstanceName}-bastion-instance-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
       UserData:
         Fn::Base64:
           !Sub |
