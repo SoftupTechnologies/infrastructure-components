@@ -5,6 +5,9 @@ Parameters:
   ProjectName:
     Description: Name of the project
     Type: String
+  ClientName:
+    Description: Client name
+    Type: String
   Environment:
     Description: Name of the stack environment
     Type: String
@@ -23,6 +26,11 @@ Resources:
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
     DeletionPolicy: Retain
 
 Outputs:
