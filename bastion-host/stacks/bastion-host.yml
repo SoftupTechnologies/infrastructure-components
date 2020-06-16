@@ -95,11 +95,6 @@ Resources:
     Properties:
       Roles:
         - !Ref EC2RoleToReadFromBucket
-      Tags:
-        - Key: cost-center
-          Value: !Ref ClientName
-        - Key: project
-          Value: !Ref ProjectName
       
   BastionInstance:
     Type: AWS::EC2::Instance
