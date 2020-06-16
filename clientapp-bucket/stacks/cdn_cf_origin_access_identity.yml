@@ -4,7 +4,6 @@ Parameters:
   OAIComment:
     Type: String
     Default: CF origin access id
-  
   Environment:
     Type: String
     AllowedValues:

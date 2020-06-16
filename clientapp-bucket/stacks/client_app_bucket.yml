@@ -3,7 +3,12 @@ Parameters:
   BucketName:
     Description: Name of the bucket
     Type: String
-
+  ProjectName:
+    Description: Name of the project
+    Type: String
+  ClientName:
+    Description: Client name
+    Type: String
   Environment:
     Description: Environment
     Type: String
@@ -21,6 +26,11 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   BucketPolicy:
     Type: AWS::S3::BucketPolicy
