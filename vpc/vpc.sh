@@ -1,6 +1,7 @@
 #!/bin/bash
 
-VPC_NAME='serverless-reference-infrastructure'
+PROJECT_NAME='serverless-reference-infrastructure'
+CLIENT_NAME='example-client'
 ENVIRONMENT='dev'
 AWS_REGION='eu-central-1'
 
@@ -9,4 +10,5 @@ aws cloudformation deploy \
   --region $AWS_REGION \
   --stack-name $VPC_NAME-vpc-$ENVIRONMENT \
   --parameter-overrides Environment=$ENVIRONMENT \
-                        VpcName=$VPC_NAME
+                        ProjectName=$PROJECT_NAME \
+                        ClientName=$CLIENT_NAME
