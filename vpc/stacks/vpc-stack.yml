@@ -1,7 +1,10 @@
 ---
 Parameters:
-  VpcName:
+  ProjectName:
     Description: Name of the application
+    Type: String
+  ClientName:
+    Description: Client name
     Type: String
   Environment:
     Description: Name of the stack environment
@@ -40,14 +43,22 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-vpc-${Environment}
+          Value: !Sub ${ProjectName}-vpc-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-internet-gateway-${Environment}
+          Value: !Sub ${ProjectName}-internet-gateway-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -64,7 +75,11 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-public-subnet-a-${Environment}
+          Value: !Sub ${ProjectName}-public-subnet-a-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   PublicSubnetB:
     Type: AWS::EC2::Subnet
@@ -75,7 +90,11 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-public-subnet-b-${Environment}
+          Value: !Sub ${ProjectName}-public-subnet-b-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   PrivateSubnetA:
     Type: AWS::EC2::Subnet
@@ -86,7 +105,11 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-private-subnet-a-${Environment}
+          Value: !Sub ${ProjectName}-private-subnet-a-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   PrivateSubnetB:
     Type: AWS::EC2::Subnet
@@ -97,19 +120,33 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-private-subnet-b-${Environment}
+          Value: !Sub ${ProjectName}-private-subnet-b-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   NatEipA:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   NatEipB:
     Type: AWS::EC2::EIP
     DependsOn: InternetGatewayAttachment
     Properties:
       Domain: vpc
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   NatGatewayA:
     Type: AWS::EC2::NatGateway
@@ -118,7 +155,11 @@ Resources:
       SubnetId: !Ref PublicSubnetA
       Tags:
         - Key: NameE
-          Value: !Sub ${VpcName}-nat-gateway-a-${Environment}
+          Value: !Sub ${ProjectName}-nat-gateway-a-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   NatGatewayB:
     Type: AWS::EC2::NatGateway
@@ -127,7 +168,11 @@ Resources:
       SubnetId: !Ref PublicSubnetB
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-nat-gateway-b-${Environment}
+          Value: !Sub ${ProjectName}-nat-gateway-b-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   # Route tables
 
@@ -137,7 +182,11 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-public-route-table-${Environment}
+          Value: !Sub ${ProjectName}-public-route-table-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -165,7 +214,12 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-private-route-table-a-${Environment}
+          Value: !Sub ${ProjectName}-private-route-table-a-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
+
 
   DefaultPrivateRouteA:
     Type: AWS::EC2::Route
@@ -186,7 +240,12 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-private-route-table-b-${Environment}
+          Value: !Sub ${ProjectName}-private-route-table-b-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
+
 
   DefaultPrivateRouteB:
     Type: AWS::EC2::Route
@@ -207,7 +266,11 @@ Resources:
       GroupName: "no-ingress-sg"
       GroupDescription: "Security group with no ingress rule (Default sg that instances get attached on)"
       VpcId: !Ref VPC
-
+      Tags:
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
 Outputs:
   VPC:

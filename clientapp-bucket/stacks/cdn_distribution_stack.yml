@@ -4,7 +4,12 @@ Parameters:
   DistributionName:
     Type: String
     Description: Distribution name
-
+  ProjectName:
+    Description: Name of the project
+    Type: String
+  ClientName:
+    Description: Client name
+    Type: String
   Environment:
     Type: String
     Description: Environment name
@@ -43,6 +48,10 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${DistributionName}-cloud-front-distribution-${Environment}
+        - Key: cost-center
+          Value: !Ref ClientName
+        - Key: project
+          Value: !Ref ProjectName
 
 Outputs:
   CFDomainName:

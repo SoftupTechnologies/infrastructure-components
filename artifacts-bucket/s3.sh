@@ -3,6 +3,7 @@
 set -Eeuo pipefail
 
 PROJECT_NAME='serverless-reference-infrastructure'
+CLIENT_NAME='example-client'
 ENVIRONMENT='dev'
 AWS_REGION='eu-central-1'
 
@@ -13,4 +14,5 @@ aws cloudformation deploy \
   --stack-name $PROJECT_NAME-bucket-artifacts-$ENVIRONMENT \
   --no-fail-on-empty-changeset \
   --parameter-overrides Environment=$ENVIRONMENT \
-                        ProjectName=$PROJECT_NAME
+                        ProjectName=$PROJECT_NAME \
+                        ClientName=$CLIENT_NAME

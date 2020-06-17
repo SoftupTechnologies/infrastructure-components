@@ -4,6 +4,7 @@ source ./bash_utils/stack.sh
 source ./bash_utils/ssm.sh
 
 PROJECT_NAME=serverless-reference-infrastructure
+CLIENT_NAME=example-client
 AWS_REGION=eu-central-1
 ENVIRONMENT=dev
 
@@ -23,4 +24,5 @@ aws cloudformation deploy \
                         DBPassword=$db_password \
                         Subnets=$subnets \
                         VpcId=$vpc_id \
-                        InstanceType=db.t2.micro
+                        InstanceType=db.t2.micro \
+                        ClientName=$CLIENT_NAME
