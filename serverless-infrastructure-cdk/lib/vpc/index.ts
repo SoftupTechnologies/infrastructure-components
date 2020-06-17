@@ -15,6 +15,7 @@ export class MyVpc extends cdk.Construct {
   public readonly privateSubnets: ec2.PrivateSubnet[] = [];
   public readonly publicSubnets: ec2.PublicSubnet[] = [];
   public readonly vpc: ec2.Vpc;
+  public readonly subnetsForBastionHost: ec2.Subnet[] = [];
 
   constructor(scope: cdk.Construct, id: string, props: VpcProps) {
     super(scope, id);
@@ -28,6 +29,8 @@ export class MyVpc extends cdk.Construct {
       }],
     });
 
+    this.vpc = vpc;
+
     const { privateSubnetProps, publicSubnetProps, tags } = props;
 
     privateSubnetProps?.forEach((privSubProps, i) => {
@@ -39,6 +42,10 @@ export class MyVpc extends cdk.Construct {
       });
 
       tagConstruct(privateSubnet, tags);
+
+      if (privSubProps.withBastionHost) {
+        this.subnetsForBastionHost.push(privateSubnet);
+      }
 
       this.privateSubnets.push(
         privateSubnet
@@ -61,6 +68,10 @@ export class MyVpc extends cdk.Construct {
 
       if (pubSubProps.withNatGateway) {
         publicSubnet.addNatGateway();
+      }
+
+      if (pubSubProps.withBastionHost) {
+        this.subnetsForBastionHost.push(publicSubnet);
       }
 
       this.publicSubnets.push(

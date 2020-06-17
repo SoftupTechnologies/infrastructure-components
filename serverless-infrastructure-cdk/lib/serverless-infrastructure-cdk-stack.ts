@@ -1,8 +1,9 @@
 import * as cdk from '@aws-cdk/core';
-import * as s3 from '@aws-cdk/aws-s3';
+import * as ec2 from '@aws-cdk/aws-ec2';
 
 import { ArtifactsBucket } from './artifacts-bucket';
 import { MyVpc } from './vpc';
+import { BastionHostServices } from './bastion-host';
 
 export enum Envs {
   DEV = 'dev',
@@ -20,7 +21,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
     super(scope, id);
 
-    new ArtifactsBucket(this, 'ArtifactsBucket', {
+    new ArtifactsBucket(this, `ArtifactsBucket-${props.env}`, {
       artifactBucketName: `${props.projectName}-artifacts-bucket-${props.clientName}-${props.env}`,
       tags: [
         {
@@ -34,7 +35,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       ]
     });
 
-    new MyVpc(this, `MyVpc`, {
+    const myVpc = new MyVpc(this, `MyVpc-${props.env}`, {
       vpcCidr: '10.0.0.0/16',
       publicSubnetProps: [
         {
@@ -42,6 +43,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
           az: 'eu-central-1a',
           mapPublicIpOnLaunch: true,
           withNatGateway: true,
+          withBastionHost: true,
         }
       ],
       privateSubnetProps: [
@@ -61,5 +63,16 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
         }
       ]
     });
+
+    const bastionInstanceType = new ec2.InstanceType('t2.micro');
+
+    const bastionInst = new BastionHostServices(this, `BastionHostServices-${props.env}`, {
+      subnets: myVpc.subnetsForBastionHost,
+      vpc: myVpc.vpc,
+      instanceName: `${props.projectName}-bastion-instance-${props.clientName}-${props.env}`,
+      instanceType: bastionInstanceType,
+    });
+
+    console.log(bastionInst.bastionHostInstance.role)
   }
 }

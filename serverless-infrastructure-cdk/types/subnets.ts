@@ -3,4 +3,5 @@ export type SubnetProps = {
   az: string,
   mapPublicIpOnLaunch?: boolean,
   withNatGateway?: boolean,
+  withBastionHost?: boolean,
 }
