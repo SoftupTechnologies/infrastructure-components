@@ -1,18 +1,26 @@
-import * as sns from '@aws-cdk/aws-sns';
-import * as subs from '@aws-cdk/aws-sns-subscriptions';
-import * as sqs from '@aws-cdk/aws-sqs';
 import * as cdk from '@aws-cdk/core';
+import * as s3 from '@aws-cdk/aws-s3';
+
+import { ArtifactsBucket } from './artifacts-bucket';
+
+export enum Envs {
+  DEV = 'dev',
+  STAGE = 'stage',
+  PROD = 'prod',
+}
+
+interface StackProps {
+  projectName: string,
+  clientName: string,
+  env: Envs,
+}
 
 export class ServerlessInfrastructureCdkStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
 
-    const queue = new sqs.Queue(this, 'ServerlessInfrastructureCdkQueue', {
-      visibilityTimeout: cdk.Duration.seconds(300)
+    new ArtifactsBucket(this, 'ArtifactsBucket', {
+      artifactBucketName: `${props.projectName}-artifacts-bucket-${props.clientName}`,
     });
-
-    const topic = new sns.Topic(this, 'ServerlessInfrastructureCdkTopic');
-
-    topic.addSubscription(new subs.SqsSubscription(queue));
   }
 }
