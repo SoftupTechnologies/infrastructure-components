@@ -1,9 +1,10 @@
 import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
+import { Tags } from './../types/tags';
 
 export interface IProps {
   artifactBucketName: string;
-  tags: {key: string, value: string}[];
+  tags: Tags;
 };
 
 export class ArtifactsBucket extends cdk.Construct {
