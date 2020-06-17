@@ -1,6 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
-import { Tags } from './../types/tags';
+import { Tags } from '../../types/tags';
+import { tagConstruct } from '../../helpers';
 
 export interface IProps {
   artifactBucketName: string;
@@ -21,9 +22,7 @@ export class ArtifactsBucket extends cdk.Construct {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
-    props.tags.forEach((tag) => {
-      cdk.Tag.add(bucket, tag.key, tag.value);
-    });
+    tagConstruct(bucket, props.tags);
 
     this.bucketName = bucket.bucketName;
     this.bucket = bucket;
