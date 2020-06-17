@@ -3,6 +3,7 @@ import * as s3 from '@aws-cdk/aws-s3';
 
 export interface IProps {
   artifactBucketName: string;
+  tags: {key: string, value: string}[];
 };
 
 export class ArtifactsBucket extends cdk.Construct {
@@ -17,6 +18,10 @@ export class ArtifactsBucket extends cdk.Construct {
       bucketName: props.artifactBucketName,
       accessControl: s3.BucketAccessControl.PRIVATE,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    props.tags.forEach((tag) => {
+      cdk.Tag.add(bucket, tag.key, tag.value);
     });
 
     this.bucketName = bucket.bucketName;

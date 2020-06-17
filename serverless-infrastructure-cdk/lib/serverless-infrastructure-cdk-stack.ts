@@ -20,7 +20,17 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
     super(scope, id);
 
     new ArtifactsBucket(this, 'ArtifactsBucket', {
-      artifactBucketName: `${props.projectName}-artifacts-bucket-${props.clientName}`,
+      artifactBucketName: `${props.projectName}-artifacts-bucket-${props.clientName}-${props.env}`,
+      tags: [
+        {
+          key: 'cost-center',
+          value: props.clientName,
+        },
+        {
+          key: 'project',
+          value: props.projectName,
+        }
+      ]
     });
   }
 }
