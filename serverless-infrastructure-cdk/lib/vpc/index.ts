@@ -21,7 +21,11 @@ export class MyVpc extends cdk.Construct {
 
     const vpc = new ec2.Vpc(this, 'MyVpc', {
       cidr: props.vpcCidr,
-      subnetConfiguration: [],
+      subnetConfiguration: [{
+        cidrMask: 24,
+        name: 'default-public-subnet',
+        subnetType: ec2.SubnetType.PUBLIC,
+      }],
     });
 
     const { privateSubnetProps, publicSubnetProps, tags } = props;
