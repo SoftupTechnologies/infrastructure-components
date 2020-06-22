@@ -23,20 +23,16 @@ export class RdsInfrastructure extends cdk.Construct {
 
     // });
 
-    const rdsSg = new ec2.SecurityGroup(this, 'RdsSg', {
-      vpc: props.vpc,
-      description: 'Rds security group',
-    });
-
-    rdsSg.addIngressRule(ec2.Peer.ipv4(props.cidrForIngressTraffic), ec2.Port.tcp(5439));
-
-    this.instance = new rds.DatabaseInstance(this, 'RdsDbInstance', {
+    const instance = new rds.DatabaseInstance(this, 'RdsDbInstance', {
       engine: rds.DatabaseInstanceEngine.POSTGRES,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
       masterUsername: `${props.projectName}-${props.dbMasterUserName}-${props.env}`,
       vpc: props.vpc,
       databaseName: props.databaseName,
-      securityGroups: [rdsSg],
     });
+
+    instance.connections.allowFrom(ec2.Peer.ipv4(props.cidrForIngressTraffic), ec2.Port.tcp(5439));
+
+    this.instance = instance;
   }
 }
