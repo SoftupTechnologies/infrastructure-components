@@ -20,6 +20,7 @@ export class ArtifactsBucket extends cdk.Construct {
       bucketName: props.artifactBucketName,
       accessControl: s3.BucketAccessControl.PRIVATE,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     });
 
     tagConstruct(bucket, props.tags);
