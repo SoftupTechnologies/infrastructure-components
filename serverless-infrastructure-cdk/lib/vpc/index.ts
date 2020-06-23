@@ -9,6 +9,7 @@ export interface VpcProps {
   publicSubnetProps?: SubnetProps[];
   privateSubnetProps?: SubnetProps[];
   tags?: Tags;
+  maxAzs?: number;
 }
 
 export class MyVpc extends cdk.Construct {
@@ -22,6 +23,7 @@ export class MyVpc extends cdk.Construct {
 
     const vpc = new ec2.Vpc(this, 'MyVpc', {
       cidr: props.vpcCidr,
+      maxAzs: props.maxAzs,
       subnetConfiguration: [{
         cidrMask: 24,
         name: 'default-public-subnet',

@@ -34,21 +34,21 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
     const myVpc = new MyVpc(this, `MyVpc-${props.env}`, {
       vpcCidr: '10.0.0.0/16',
-      publicSubnetProps: [
-        {
-          cidr: '10.0.5.0/24',
-          az: 'eu-central-1a',
-          mapPublicIpOnLaunch: true,
-          withNatGateway: true,
-          withBastionHost: true,
-        }
-      ],
-      privateSubnetProps: [
-        {
-          cidr: '10.0.6.0/24',
-          az: 'eu-central-1a',
-        }
-      ],
+      // publicSubnetProps: [
+      //   {
+      //     cidr: '10.0.5.0/24',
+      //     az: 'eu-central-1a',
+      //     mapPublicIpOnLaunch: true,
+      //     withNatGateway: true,
+      //     withBastionHost: true,
+      //   }
+      // ],
+      // privateSubnetProps: [
+      //   {
+      //     cidr: '10.0.6.0/24',
+      //     az: 'eu-central-1a',
+      //   }
+      // ],
       tags: [
         {
           key: 'cost-center',
@@ -67,8 +67,10 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
     const database = new RdsInfrastructure(this, 'Rds', {
       ...props,
-      dbMasterUserName: 'db',
+      dbMasterUserName: 'mydbMasterUser',
       vpc: myVpc.vpc,
+      databaseName: 'mydb',
+      cidrForIngressTraffic: '10.0.5.0/24',
     });
 
     // new cdk.CfnOutput(this, 'VpcId', {
@@ -76,14 +78,14 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
     //   value: myVpc.vpc.vpcId,
     // });
 
-    new cdk.CfnOutput(this, 'ClientAppDomain', {
-      exportName: 'ClientAppDomain',
-      value: caInfrastructure.clientAppCfDomainName,
-    });
+    // new cdk.CfnOutput(this, 'ClientAppDomain', {
+    //   exportName: 'ClientAppDomain',
+    //   value: caInfrastructure.clientAppCfDomainName,
+    // });
 
-    new cdk.CfnOutput(this, 'ClientAppDistributionId', {
-      exportName: 'ClientAppDistributionId',
-      value: caInfrastructure.clientAppDistributionId,
-    })
+    // new cdk.CfnOutput(this, 'ClientAppDistributionId', {
+    //   exportName: 'ClientAppDistributionId',
+    //   value: caInfrastructure.clientAppDistributionId,
+    // })
   }
 }
