@@ -1,3 +1,4 @@
+import { Envs } from './../../types/envs';
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as s3 from '@aws-cdk/aws-s3';
@@ -8,14 +9,14 @@ export interface BastionHostServicesProps {
   subnets: ec2.Subnet[];
   vpc: ec2.Vpc;
   instanceName: string;
-  instanceType: ec2.InstanceType;
-  env: string;
+  instanceType?: ec2.InstanceType;
+  env: Envs;
   projectName: string;
   clientName: string;
 };
 
 export class BastionHostServices extends cdk.Construct {
-  public readonly bastionHostInstance: ec2.BastionHostLinux;
+  public readonly bastionHostInstance: ec2.Instance;
 
   constructor(scope: cdk.Construct, id: string, props: BastionHostServicesProps) {
     super(scope, id);
@@ -24,7 +25,7 @@ export class BastionHostServices extends cdk.Construct {
      * Create S3 Bucket to hold public keys
      */
     const bucket = new s3.Bucket(this, 'BastionHostPublicKeys', {
-      bucketName: `bastion-host-public-keys-${props.env}`,
+      bucketName: `${props.projectName}-bastion-host-public-keys-${props.env}`,
       accessControl: s3.BucketAccessControl.PRIVATE,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -67,26 +68,20 @@ export class BastionHostServices extends cdk.Construct {
       },
     });
 
-
-    /**
-     * Instance Profile
-     */
-    const instanceProfile = new iam.CfnInstanceProfile(this, 'InstanceProfile', {
-      roles: [ec2Role.roleArn],
+    this.bastionHostInstance = new ec2.Instance(this, 'BastionHostInstance', {
+      instanceName: `${props.projectName}-${props.instanceName}-bastion-host-${props.env}`,
+      vpc: props.vpc,
+      instanceType: props.instanceType || ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
+      machineImage: ec2.MachineImage.latestAmazonLinux({
+        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+        edition: ec2.AmazonLinuxEdition.STANDARD,
+      }),
+      role: ec2Role,
+      securityGroup: bastionHostSecurityGroup,
     });
 
-    /**
-     * EC2 Instance
-     */
-
-    // const bastionInstance = new ec2.Instance(this, 'BastionHostInstance', {
-    //   instanceName: 'some-name',
-    //   keyName: 'serverless-something',
-    //   vpc: props.vpc,
-    //   role: ec2Role,
-    //   securityGroup: bastionHostSecurityGroup,
-    // });
-
-    // this.bastionHostInstance = bastionHost;
+    this.bastionHostInstance.userData.addExecuteFileCommand({
+      filePath: './user_data.sh',
+    });
   }
 }
