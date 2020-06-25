@@ -1,9 +1,12 @@
-import { Envs } from './../../types/envs';
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as s3 from '@aws-cdk/aws-s3';
 import * as iam from '@aws-cdk/aws-iam';
+import { Asset } from '@aws-cdk/aws-s3-assets';
+import path = require("path");
 import { tagConstruct } from '../../helpers';
+import { Envs } from './../../types/envs';
+
 
 export interface BastionHostServicesProps {
   subnets: ec2.Subnet[];
@@ -13,6 +16,7 @@ export interface BastionHostServicesProps {
   env: Envs;
   projectName: string;
   clientName: string;
+  keyName?: string;
 };
 
 export class BastionHostServices extends cdk.Construct {
@@ -24,8 +28,10 @@ export class BastionHostServices extends cdk.Construct {
     /**
      * Create S3 Bucket to hold public keys
      */
+    const bucketName = `${props.projectName}-bastion-host-public-keys-${props.env}`;
+
     const bucket = new s3.Bucket(this, 'BastionHostPublicKeys', {
-      bucketName: `${props.projectName}-bastion-host-public-keys-${props.env}`,
+      bucketName,
       accessControl: s3.BucketAccessControl.PRIVATE,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -78,10 +84,23 @@ export class BastionHostServices extends cdk.Construct {
       }),
       role: ec2Role,
       securityGroup: bastionHostSecurityGroup,
+      keyName: props.keyName,
     });
 
-    this.bastionHostInstance.userData.addExecuteFileCommand({
-      filePath: './user_data.sh',
+    const userDataAsset = new Asset(this, 'UserDataAsset', {
+      path: path.join(__dirname, 'user_data.sh') 
     });
+
+    const localPath = this.bastionHostInstance.userData.addS3DownloadCommand({
+      bucket: userDataAsset.bucket,
+      bucketKey: userDataAsset.s3ObjectKey,
+    })
+
+    this.bastionHostInstance.userData.addExecuteFileCommand({
+      filePath: localPath,
+      arguments: `-b ${bucketName} -r eu-central-1`
+    });
+
+    userDataAsset.grantRead(this.bastionHostInstance.role);
   }
 }

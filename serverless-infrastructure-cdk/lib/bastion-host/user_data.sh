@@ -1,5 +1,21 @@
 #!/bin/bash
 
+
+while getopts b:r: option
+
+do
+
+case "${option}"
+
+in
+
+b) BUCKET_NAME=${OPTARG};;
+r) REGION=${OPTARG};;
+
+esac
+
+done
+
 mkdir /usr/bin/bastion
 
 #The public keys are stored on 
@@ -9,6 +25,22 @@ mkdir /usr/bin/bastion
 # /home/username/.ssh/authorized_keys
 
 cat > /usr/bin/bastion/sync_users << 'EOF'
+while getopts b:r: option
+
+do
+
+case "${option}"
+
+in
+
+b) BUCKET_NAME=${OPTARG};;
+r) REGION=${OPTARG};;
+
+esac
+
+done
+
+mkdir /usr/bin/bastion
 
 # The function returns the user name from the public key file name.
 # Example: public-keys/sshuser.pub => sshuser
@@ -17,7 +49,7 @@ get_user_name () {
 }
 
 # For each public key available in the S3 bucket
-aws s3api list-objects --bucket ${PubKeysBucketName}-s3-bucket-${Environment} --prefix public-keys/ --region ${AWS::Region}  --output text --query 'Contents[?Size>`0`].Key' | sed -e 'y/\t/\n/' > ~/keys_retrieved_from_s3
+aws s3api list-objects --bucket $BUCKET_NAME --prefix public-keys/ --region $REGION  --output text --query 'Contents[?Size>`0`].Key' | sed -e 'y/\t/\n/' > ~/keys_retrieved_from_s3
 while read line; do
   USER_NAME="`get_user_name "$line"`"
 
@@ -38,7 +70,7 @@ while read line; do
     if [ -f ~/keys_installed ]; then
       grep -qx "$line" ~/keys_installed
       if [ $? -eq 0 ]; then
-        aws s3 cp s3://${PubKeysBucketName}-s3-bucket-${Environment}/$line /home/$USER_NAME/.ssh/authorized_keys --region ${AWS::Region}
+        aws s3 cp s3://$BUCKET_NAME/$line /home/$USER_NAME/.ssh/authorized_keys --region $REGION
         chmod 600 /home/$USER_NAME/.ssh/authorized_keys
         chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh/authorized_keys
       fi
@@ -64,7 +96,7 @@ EOF
 chmod 700 /usr/bin/bastion/sync_users
 
 cat > ~/mycron << EOF
-*/3 * * * * /usr/bin/bastion/sync_users
+*/3 * * * * /usr/bin/bastion/sync_users -b $BUCKET_NAME -r $REGION
 0 0 * * * yum -y update --security
 EOF
 crontab ~/mycron

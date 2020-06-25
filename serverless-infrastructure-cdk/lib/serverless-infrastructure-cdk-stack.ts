@@ -77,6 +77,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       instanceName: 'test-bh',
       vpc: myVpc.vpc,
       subnets: myVpc.subnetsForBastionHost,
+      keyName: 'serverless-bastion-host'
     });
 
     new cdk.CfnOutput(this, 'VpcId', {
