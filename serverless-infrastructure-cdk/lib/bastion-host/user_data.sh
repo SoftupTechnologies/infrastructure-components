@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 while getopts b:r: option
 
 do
@@ -25,23 +24,6 @@ mkdir /usr/bin/bastion
 # /home/username/.ssh/authorized_keys
 
 cat > /usr/bin/bastion/sync_users << 'EOF'
-while getopts b:r: option
-
-do
-
-case "${option}"
-
-in
-
-b) BUCKET_NAME=${OPTARG};;
-r) REGION=${OPTARG};;
-
-esac
-
-done
-
-mkdir /usr/bin/bastion
-
 # The function returns the user name from the public key file name.
 # Example: public-keys/sshuser.pub => sshuser
 get_user_name () {
@@ -49,6 +31,7 @@ get_user_name () {
 }
 
 # For each public key available in the S3 bucket
+
 aws s3api list-objects --bucket $BUCKET_NAME --prefix public-keys/ --region $REGION  --output text --query 'Contents[?Size>`0`].Key' | sed -e 'y/\t/\n/' > ~/keys_retrieved_from_s3
 while read line; do
   USER_NAME="`get_user_name "$line"`"
@@ -59,10 +42,10 @@ while read line; do
     # Create a user account if it does not already exist
     cut -d: -f1 /etc/passwd | grep -qx $USER_NAME
     if [ $? -eq 1 ]; then
-      /usr/sbin/adduser $USER_NAME && \
-      mkdir -m 700 /home/$USER_NAME/.ssh && \
-      chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh && \
-      echo "$line" >> ~/keys_installed
+       /usr/sbin/adduser $USER_NAME && \
+       mkdir -m 700 /home/$USER_NAME/.ssh && \
+       chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh && \
+       echo "$line" >> ~/keys_installed
     fi
 
     # Copy the public key from S3, if a user account was created 
@@ -71,8 +54,8 @@ while read line; do
       grep -qx "$line" ~/keys_installed
       if [ $? -eq 0 ]; then
         aws s3 cp s3://$BUCKET_NAME/$line /home/$USER_NAME/.ssh/authorized_keys --region $REGION
-        chmod 600 /home/$USER_NAME/.ssh/authorized_keys
-        chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh/authorized_keys
+         chmod 600 /home/$USER_NAME/.ssh/authorized_keys
+         chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh/authorized_keys
       fi
     fi
 
@@ -86,7 +69,7 @@ if [ -f ~/keys_installed ]; then
   comm -13 ~/keys_retrieved_from_s3 ~/keys_installed | sed "s/\t//g" > ~/keys_to_remove
   while read line; do
     USER_NAME="`get_user_name "$line"`"
-    /usr/sbin/userdel -r -f $USER_NAME
+     /usr/sbin/userdel -r -f $USER_NAME
   done < ~/keys_to_remove
   comm -3 ~/keys_installed ~/keys_to_remove | sed "s/\t//g" > ~/tmp && mv ~/tmp ~/keys_installed
 fi
@@ -96,7 +79,7 @@ EOF
 chmod 700 /usr/bin/bastion/sync_users
 
 cat > ~/mycron << EOF
-*/3 * * * * /usr/bin/bastion/sync_users -b $BUCKET_NAME -r $REGION
+*/1 * * * * /usr/bin/bastion/sync_users
 0 0 * * * yum -y update --security
 EOF
 crontab ~/mycron

@@ -64,7 +64,7 @@ export class BastionHostServices extends cdk.Construct {
     bastionHostS3Policy.addStatements(new iam.PolicyStatement({
       resources: [bucket.bucketArn],
       effect: iam.Effect.ALLOW,
-      actions: ['s3:GetObject', 's3:ListObject'],
+      actions: ['s3:GetObject', 's3:ListBucket'],
     }));
 
     const ec2Role = new iam.Role(this, 'EC2RoleToReadFromBucket', {
@@ -98,7 +98,7 @@ export class BastionHostServices extends cdk.Construct {
 
     this.bastionHostInstance.userData.addExecuteFileCommand({
       filePath: localPath,
-      arguments: `-b ${bucketName} -r eu-central-1`
+      arguments: `-b ${bucketName} -r eu-central-1`,
     });
 
     userDataAsset.grantRead(this.bastionHostInstance.role);
