@@ -13,7 +13,7 @@ export interface RdsInfrastructureProps {
   cidrForIngressTraffic?: string,
   ingressSgs?: ec2.SecurityGroup[],
   dbPort?: number,
-  dbSubnets?: ec2.Subnet[],
+  dbSubnets?: ec2.ISubnet[],
 }
 
 export class RdsInfrastructure extends cdk.Construct {
@@ -30,22 +30,17 @@ export class RdsInfrastructure extends cdk.Construct {
       databaseName: props.databaseName,
       instanceIdentifier: `${props.projectName}-db-instance-${props.env}`,
       allocatedStorage: props.env === Envs.PROD ? 20 : 5,
-      port: props.dbPort || 5439,
+      port: props.dbPort || 5432,
       backupRetention: cdk.Duration.days(1),
       vpcPlacement: props.dbSubnets ? {
         subnets: props.dbSubnets,
       } : undefined,
       deletionProtection: props.env === Envs.PROD ? true : false,
+      securityGroups: props.ingressSgs,
     });
 
     if (props.cidrForIngressTraffic) {
-      this.instance.connections.allowFrom(ec2.Peer.ipv4(props.cidrForIngressTraffic), ec2.Port.tcp(5439));
-    }
-
-    if (props.ingressSgs) {
-      props.ingressSgs.forEach(sg => {
-        this.instance.connections.addSecurityGroup(sg);
-      });
+      this.instance.connections.allowFrom(ec2.Peer.ipv4(props.cidrForIngressTraffic), ec2.Port.tcp(props.dbPort || 5432));
     }
   }
 }
