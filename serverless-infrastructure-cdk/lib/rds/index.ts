@@ -10,10 +10,10 @@ export interface RdsInfrastructureProps {
   dbMasterUserName: string,
   vpc: ec2.Vpc,
   databaseName: string,
-  cidrForIngressTraffic?: string,
   ingressSgs?: ec2.SecurityGroup[],
   dbPort?: number,
-  dbSubnets?: ec2.Subnet[],
+  dbSubnets?: ec2.ISubnet[],
+  publicAccessible?: boolean,
 }
 
 export class RdsInfrastructure extends cdk.Construct {
@@ -21,6 +21,14 @@ export class RdsInfrastructure extends cdk.Construct {
 
   constructor(scope: cdk.Construct, id: string, props: RdsInfrastructureProps) {
     super(scope, id);
+
+    const vpcPlacement: any = {};
+
+    if (props.publicAccessible) {
+      vpcPlacement.subnetType = ec2.SubnetType.PUBLIC;
+    } else if (props.dbSubnets) {
+      vpcPlacement.subnets = props.dbSubnets;
+    }
 
     this.instance = new rds.DatabaseInstance(this, 'RdsDbInstance', {
       engine: rds.DatabaseInstanceEngine.POSTGRES,
@@ -30,22 +38,11 @@ export class RdsInfrastructure extends cdk.Construct {
       databaseName: props.databaseName,
       instanceIdentifier: `${props.projectName}-db-instance-${props.env}`,
       allocatedStorage: props.env === Envs.PROD ? 20 : 5,
-      port: props.dbPort || 5439,
+      port: props.dbPort || 5432,
       backupRetention: cdk.Duration.days(1),
-      vpcPlacement: props.dbSubnets ? {
-        subnets: props.dbSubnets,
-      } : undefined,
+      vpcPlacement,
       deletionProtection: props.env === Envs.PROD ? true : false,
+      securityGroups: props.ingressSgs,
     });
-
-    if (props.cidrForIngressTraffic) {
-      this.instance.connections.allowFrom(ec2.Peer.ipv4(props.cidrForIngressTraffic), ec2.Port.tcp(5439));
-    }
-
-    if (props.ingressSgs) {
-      props.ingressSgs.forEach(sg => {
-        this.instance.connections.addSecurityGroup(sg);
-      });
-    }
   }
 }
