@@ -85,7 +85,7 @@ file="/usr/bin/bastion/vars"
 BUCKET_NAME=$(cut -d , -f 1 $file)
 REGION=$(cut -d , -f 2 $file)
 
-*/1 * * * * /usr/bin/bastion/sync_users $BUCKET_NAME $REGION
+*/3 * * * * /usr/bin/bastion/sync_users $BUCKET_NAME $REGION
 0 0 * * * yum -y update --security
 EOF
 

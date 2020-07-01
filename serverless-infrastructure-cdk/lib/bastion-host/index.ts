@@ -21,6 +21,7 @@ export interface BastionHostServicesProps {
 
 export class BastionHostServices extends cdk.Construct {
   public readonly bastionHostInstance: ec2.Instance;
+  public readonly bastionHostSecurityGroup: ec2.SecurityGroup;
 
   constructor(scope: cdk.Construct, id: string, props: BastionHostServicesProps) {
     super(scope, id);
@@ -43,16 +44,16 @@ export class BastionHostServices extends cdk.Construct {
     /**
      * Create Security Group for the bastion host.
      */
-    const bastionHostSecurityGroup = new ec2.SecurityGroup(this, 'BastionHostSecurityGroup', {
+    this.bastionHostSecurityGroup = new ec2.SecurityGroup(this, 'BastionHostSecurityGroup', {
       vpc: props.vpc,
       allowAllOutbound: true,
       description: 'Enables SSH Access to Bastion Hosts'
     });
 
-    bastionHostSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'SSH from anywhere');
+    this.bastionHostSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'SSH from anywhere');
     
-    cdk.Tag.add(bastionHostSecurityGroup, 'cost-center', props.clientName);
-    cdk.Tag.add(bastionHostSecurityGroup, 'project', props.projectName);
+    cdk.Tag.add(this.bastionHostSecurityGroup, 'cost-center', props.clientName);
+    cdk.Tag.add(this.bastionHostSecurityGroup, 'project', props.projectName);
 
     /**
      * Create Role that allows the bastion host to read from S3 the public keys.
@@ -86,7 +87,7 @@ export class BastionHostServices extends cdk.Construct {
         edition: ec2.AmazonLinuxEdition.STANDARD,
       }),
       role: ec2Role,
-      securityGroup: bastionHostSecurityGroup,
+      securityGroup: this.bastionHostSecurityGroup,
       keyName: props.keyName,
       vpcSubnets: {
         subnets: props.subnets,
