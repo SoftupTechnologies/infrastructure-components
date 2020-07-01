@@ -18,7 +18,7 @@ done
 
 # Install cloudwatch agent for sending logs
 
-yum install awslogs
+yum install awslogs -y
 
 sed -i -e 's/region = .*/region = $REGION/g' /etc/awslogs/awscli.conf
 sed -i -e 's/log_group_name = .*/log_group_name = $LOG_GROUP_NAME/g' /etc/awslogs/awslogs.conf
@@ -96,7 +96,7 @@ file="/usr/bin/bastion/vars"
 BUCKET_NAME=$(cut -d , -f 1 $file)
 REGION=$(cut -d , -f 2 $file)
 
-*/3 * * * * /usr/bin/bastion/sync_users $BUCKET_NAME $REGION
+*/1 * * * * /usr/bin/bastion/sync_users $BUCKET_NAME $REGION
 0 0 * * * yum -y update --security
 EOF
 
