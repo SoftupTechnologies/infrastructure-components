@@ -61,6 +61,7 @@ export class BastionHostServices extends cdk.Construct {
     const assumeRole = new iam.ServicePrincipal('ec2.amazonaws.com');
 
     const bastionHostS3Policy = new iam.PolicyDocument();
+    const cloudWatchPolicy = new iam.PolicyDocument();
 
     bastionHostS3Policy.addStatements(new iam.PolicyStatement({
       resources: [
@@ -71,10 +72,22 @@ export class BastionHostServices extends cdk.Construct {
       actions: ['s3:GetObject', 's3:ListBucket'],
     }));
 
-    const ec2Role = new iam.Role(this, 'EC2RoleToReadFromBucket', {
+    cloudWatchPolicy.addStatements(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'logs:CreateLogStream',
+        'logs:DescribeLogStreams',
+        'logs:CreateLogGroup',
+        'logs:PutLogEvents',
+      ],
+      resources: ['*'],
+    }));
+
+    const ec2Role = new iam.Role(this, 'EC2Role', {
       assumedBy: assumeRole,
       inlinePolicies: {
         'bastion-s3-read': bastionHostS3Policy,
+        'cloud-watch-put-logs': cloudWatchPolicy,
       },
     });
 
@@ -105,7 +118,7 @@ export class BastionHostServices extends cdk.Construct {
 
     this.bastionHostInstance.userData.addExecuteFileCommand({
       filePath: localPath,
-      arguments: `-b ${bucketName} -r eu-central-1`,
+      arguments: `-b ${bucketName} -r eu-central-1 -l bastion-host`,
     });
 
     userDataAsset.grantRead(this.bastionHostInstance.role);
