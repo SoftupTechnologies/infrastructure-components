@@ -9,7 +9,7 @@ import { Envs } from './../../types/envs';
 
 
 export interface BastionHostServicesProps {
-  subnets: ec2.Subnet[];
+  subnets: ec2.ISubnet[];
   vpc: ec2.Vpc;
   instanceName: string;
   instanceType?: ec2.InstanceType;
@@ -33,7 +33,7 @@ export class BastionHostServices extends cdk.Construct {
     const bucket = new s3.Bucket(this, 'BastionHostPublicKeys', {
       bucketName,
       accessControl: s3.BucketAccessControl.PRIVATE,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     });
 
@@ -62,7 +62,10 @@ export class BastionHostServices extends cdk.Construct {
     const bastionHostS3Policy = new iam.PolicyDocument();
 
     bastionHostS3Policy.addStatements(new iam.PolicyStatement({
-      resources: [bucket.bucketArn],
+      resources: [
+        bucket.bucketArn,
+        `${bucket.bucketArn}/*`
+      ],
       effect: iam.Effect.ALLOW,
       actions: ['s3:GetObject', 's3:ListBucket'],
     }));
@@ -85,6 +88,9 @@ export class BastionHostServices extends cdk.Construct {
       role: ec2Role,
       securityGroup: bastionHostSecurityGroup,
       keyName: props.keyName,
+      vpcSubnets: {
+        subnets: props.subnets,
+      },
     });
 
     const userDataAsset = new Asset(this, 'UserDataAsset', {
