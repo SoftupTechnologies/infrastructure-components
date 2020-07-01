@@ -17,7 +17,6 @@ interface StackProps {
 export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
     super(scope, id);
-
     // new ArtifactsBucket(this, `ArtifactsBucket-${props.env}`, {
     //   artifactBucketName: `${props.projectName}-artifacts-bucket-${props.clientName}-${props.env}`,
     //   tags: [
@@ -47,57 +46,66 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       ]
     });
 
+    new BastionHostServices(this, 'BastionServices', {
+      ...props,
+      vpc: myVpc.vpc,
+      instanceName: 'test',
+      subnets: [myVpc.vpc.publicSubnets[0]],
+      keyName: 'serverless-bastion-host',
+    });
+
+
     // const caInfrastructure = new ClientAppInfrastructure(this, 'ClientAppInfrastructure', {
     //   clientAppBucketName: `${props.projectName}-client-app-bucket-${props.clientName}-${props.env}`,
     // });
 
-    const rdsIngressSg = new ec2.SecurityGroup(this, 'RdsIngressSg', {
-      vpc: myVpc.vpc,
-      securityGroupName: `${props.projectName}-rds-ingress`,
-    });
+    // const rdsIngressSg = new ec2.SecurityGroup(this, 'RdsIngressSg', {
+    //   vpc: myVpc.vpc,
+    //   securityGroupName: `${props.projectName}-rds-ingress`,
+    // });
 
-    rdsIngressSg.addIngressRule(
-      ec2.Peer.anyIpv4(),
-      ec2.Port.tcp(5432),
-    );
+    // rdsIngressSg.addIngressRule(
+    //   ec2.Peer.anyIpv4(),
+    //   ec2.Port.tcp(5432),
+    // );
 
-    rdsIngressSg.addIngressRule(
-      ec2.Peer.ipv4('10.0.0.0/16'),
-      ec2.Port.tcp(5432),
-    );
+    // rdsIngressSg.addIngressRule(
+    //   ec2.Peer.ipv4('10.0.0.0/16'),
+    //   ec2.Port.tcp(5432),
+    // );
 
-    const database = new RdsInfrastructure(this, 'Rds', {
-      ...props,
-      dbMasterUserName: 'mydbMasterUser',
-      vpc: myVpc.vpc,
-      databaseName: 'mydb',
-      ingressSgs: [rdsIngressSg],
-      publicAccessible: true,
-    });
+    // const database = new RdsInfrastructure(this, 'Rds', {
+    //   ...props,
+    //   dbMasterUserName: 'mydbMasterUser',
+    //   vpc: myVpc.vpc,
+    //   databaseName: 'mydb',
+    //   ingressSgs: [rdsIngressSg],
+    //   publicAccessible: true,
+    // });
 
-    new cdk.CfnOutput(this, 'VpcId', {
-      exportName: 'VpcId',
-      value: myVpc.vpc.vpcId,
-    });
+    // new cdk.CfnOutput(this, 'VpcId', {
+    //   exportName: 'VpcId',
+    //   value: myVpc.vpc.vpcId,
+    // });
 
-    new cdk.CfnOutput(this, 'RdsSubnetIds', {
-      exportName: 'RdsSubnetIds',
-      value: myVpc.vpc.publicSubnets.map(sub => sub.subnetId).join(','),
-    });
+    // new cdk.CfnOutput(this, 'RdsSubnetIds', {
+    //   exportName: 'RdsSubnetIds',
+    //   value: myVpc.vpc.publicSubnets.map(sub => sub.subnetId).join(','),
+    // });
 
-    new cdk.CfnOutput(this, 'RdsEndpoint', {
-      exportName: 'RdsEndpoint',
-      value: database.instance.dbInstanceEndpointAddress,
-    });
+    // new cdk.CfnOutput(this, 'RdsEndpoint', {
+    //   exportName: 'RdsEndpoint',
+    //   value: database.instance.dbInstanceEndpointAddress,
+    // });
 
-    new cdk.CfnOutput(this, 'RdsEndpointPort', {
-      exportName: 'RdsEndpointPort',
-      value: database.instance.dbInstanceEndpointPort,
-    });
+    // new cdk.CfnOutput(this, 'RdsEndpointPort', {
+    //   exportName: 'RdsEndpointPort',
+    //   value: database.instance.dbInstanceEndpointPort,
+    // });
 
-    new cdk.CfnOutput(this, 'RdsIngressSgId', {
-      exportName: 'RdsIngressNameId',
-      value: rdsIngressSg.securityGroupId,
-    })
+    // new cdk.CfnOutput(this, 'RdsIngressSgId', {
+    //   exportName: 'RdsIngressNameId',
+    //   value: rdsIngressSg.securityGroupId,
+    // })
   }
 }

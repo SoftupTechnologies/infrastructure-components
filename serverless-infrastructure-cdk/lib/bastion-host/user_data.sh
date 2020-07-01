@@ -1,6 +1,24 @@
 #!/bin/bash
 
+while getopts b:r: option
+
+do
+
+case "${option}"
+
+in
+
+b) BUCKET_NAME=${OPTARG};;
+r) REGION=${OPTARG};;
+
+esac
+
+done
+
 mkdir /usr/bin/bastion
+touch /usr/bin/bastion/vars
+
+echo $BUCKET_NAME,$REGION > /usr/bin/bastion/vars
 
 #The public keys are stored on 
 # S3 with the following naming convention: "username.pub". This 
@@ -9,15 +27,12 @@ mkdir /usr/bin/bastion
 # /home/username/.ssh/authorized_keys
 
 cat > /usr/bin/bastion/sync_users << 'EOF'
-
-# The function returns the user name from the public key file name.
-# Example: public-keys/sshuser.pub => sshuser
 get_user_name () {
   echo "$1" | sed -e 's/.*\///g' | sed -e 's/\.pub//g'
 }
 
 # For each public key available in the S3 bucket
-aws s3api list-objects --bucket ${PubKeysBucketName}-s3-bucket-${Environment} --prefix public-keys/ --region ${AWS::Region}  --output text --query 'Contents[?Size>`0`].Key' | sed -e 'y/\t/\n/' > ~/keys_retrieved_from_s3
+aws s3api list-objects --bucket $1 --prefix public-keys/ --region $2  --output text --query 'Contents[?Size>`0`].Key' | sed -e 'y/\t/\n/' > ~/keys_retrieved_from_s3
 while read line; do
   USER_NAME="`get_user_name "$line"`"
 
@@ -38,7 +53,7 @@ while read line; do
     if [ -f ~/keys_installed ]; then
       grep -qx "$line" ~/keys_installed
       if [ $? -eq 0 ]; then
-        aws s3 cp s3://${PubKeysBucketName}-s3-bucket-${Environment}/$line /home/$USER_NAME/.ssh/authorized_keys --region ${AWS::Region}
+        aws s3 cp s3://$1/$line /home/$USER_NAME/.ssh/authorized_keys --region $2
         chmod 600 /home/$USER_NAME/.ssh/authorized_keys
         chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh/authorized_keys
       fi
@@ -61,11 +76,18 @@ fi
 
 EOF
 
+
 chmod 700 /usr/bin/bastion/sync_users
 
 cat > ~/mycron << EOF
-*/3 * * * * /usr/bin/bastion/sync_users
+file="/usr/bin/bastion/vars"
+
+BUCKET_NAME=$(cut -d , -f 1 $file)
+REGION=$(cut -d , -f 2 $file)
+
+*/3 * * * * /usr/bin/bastion/sync_users $BUCKET_NAME $REGION
 0 0 * * * yum -y update --security
 EOF
+
 crontab ~/mycron
 rm ~/mycron
