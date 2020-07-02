@@ -1,6 +1,6 @@
 #!/bin/bash
 
-while getopts b:r: option
+while getopts b:r:l: option
 
 do
 
@@ -10,10 +10,21 @@ in
 
 b) BUCKET_NAME=${OPTARG};;
 r) REGION=${OPTARG};;
+l) LOG_GROUP_NAME=${OPTARG};;
 
 esac
 
 done
+
+# Install cloudwatch agent for sending logs
+
+yum install awslogs -y
+
+sed -i -e "s/region = .*/region = $REGION/g" /etc/awslogs/awscli.conf
+sed -i -e "s/log_group_name = .*/log_group_name = $LOG_GROUP_NAME/g" /etc/awslogs/awslogs.conf
+
+service awslogsd start
+systemctl enable awslogsd
 
 mkdir /usr/bin/bastion
 touch /usr/bin/bastion/vars
@@ -85,7 +96,7 @@ file="/usr/bin/bastion/vars"
 BUCKET_NAME=$(cut -d , -f 1 $file)
 REGION=$(cut -d , -f 2 $file)
 
-*/3 * * * * /usr/bin/bastion/sync_users $BUCKET_NAME $REGION
+*/1 * * * * /usr/bin/bastion/sync_users $BUCKET_NAME $REGION
 0 0 * * * yum -y update --security
 EOF
 
