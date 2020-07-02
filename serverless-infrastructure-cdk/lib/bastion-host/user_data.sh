@@ -20,8 +20,8 @@ done
 
 yum install awslogs -y
 
-sed -i -e 's/region = .*/region = $REGION/g' /etc/awslogs/awscli.conf
-sed -i -e 's/log_group_name = .*/log_group_name = $LOG_GROUP_NAME/g' /etc/awslogs/awslogs.conf
+sed -i -e "s/region = .*/region = $REGION/g" /etc/awslogs/awscli.conf
+sed -i -e "s/log_group_name = .*/log_group_name = $LOG_GROUP_NAME/g" /etc/awslogs/awslogs.conf
 
 service awslogsd start
 systemctl enable awslogsd
