@@ -33,10 +33,23 @@
     "@aws-cdk/core" "1.48.0"
     constructs "^3.0.2"
 
-"@aws-cdk/aws-cloudfront@^1.48.0":
-  version "1.48.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cloudfront/-/aws-cloudfront-1.48.0.tgz#c1872344a7c51524c2aab527a2ebd54c5057aba4"
-  integrity sha512-JEbdtXC/UsBiFYIgUMfzI4LG9dzGE2vyx+Sr9I+P5kMtmkiKCLsLrDTeNye/SSKtcp6VbT6Ch4dGmXLgm22yJg==
+"@aws-cdk/aws-cloudformation@1.47.0":
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cloudformation/-/aws-cloudformation-1.47.0.tgz#e771a41e8b7f4bd93f6a2abc9e3262e00b7c51d3"
+  integrity sha512-PPmvLPjQPRJN2SySrlJCTjXdV1C5ki26C3YZMF3ICz58cgQgjwGzX/oUN8QeNS9909HeGDB7QwRUz7GrgObhVw==
+  dependencies:
+    "@aws-cdk/aws-iam" "1.47.0"
+    "@aws-cdk/aws-lambda" "1.47.0"
+    "@aws-cdk/aws-s3" "1.47.0"
+    "@aws-cdk/aws-sns" "1.47.0"
+    "@aws-cdk/core" "1.47.0"
+    "@aws-cdk/cx-api" "1.47.0"
+    constructs "^3.0.2"
+
+"@aws-cdk/aws-cloudfront@^1.47.0":
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cloudfront/-/aws-cloudfront-1.47.0.tgz#01fb83a0796bc15f0b088364aacc671f6c7d8809"
+  integrity sha512-POCZ8dV7h+tbkWzFrmMMBhYD9LjKctQo2mL+kZJJf26Jemvjw3S2kswyZLjA8nC3C44wJJDL7LM7sorw7BlJiw==
   dependencies:
     "@aws-cdk/aws-certificatemanager" "1.48.0"
     "@aws-cdk/aws-iam" "1.48.0"
@@ -55,10 +68,10 @@
     "@aws-cdk/core" "1.48.0"
     constructs "^3.0.2"
 
-"@aws-cdk/aws-ec2@1.48.0", "@aws-cdk/aws-ec2@^1.48.0":
-  version "1.48.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-ec2/-/aws-ec2-1.48.0.tgz#1202806f9387df1081e1a16e2e0187fff1675dcd"
-  integrity sha512-mfuAOuhdqLe8QM9OMcoaQ2i/5rhG9q3rOe5gXjSHHdi7jVstw5gsrWTszt/bk4cAWtExV0k2A13X0554nSR5aA==
+"@aws-cdk/aws-ec2@1.47.0", "@aws-cdk/aws-ec2@^1.47.0":
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-ec2/-/aws-ec2-1.47.0.tgz#5ecb02692a2cd6c5154b435ca98833ed8b468ba0"
+  integrity sha512-GH81MFJhSPu/ghCRjZf7tj+o4lc/TjHwPZMmB4V1bDRaHInESeFF+2H5YJz1J+d4zn9Gl5aSxtUFWdSFPaB5Jw==
   dependencies:
     "@aws-cdk/aws-cloudwatch" "1.48.0"
     "@aws-cdk/aws-iam" "1.48.0"
@@ -284,10 +297,10 @@
     fs-extra "^9.0.1"
     minimatch "^3.0.4"
 
-"@aws-cdk/cx-api@1.48.0":
-  version "1.48.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/cx-api/-/cx-api-1.48.0.tgz#1df4c1bcf281b755e05550b1c863541c512eedd0"
-  integrity sha512-zuL5AllIsnro2RnofJ0VpgvMaePLhJjBwY87P1yQ0BJuw3tMtmLI++WaJKj2jbzdu8eXgsHk0KwyA7yl+5DDIw==
+"@aws-cdk/cx-api@1.47.0":
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/cx-api/-/cx-api-1.47.0.tgz#b10d4909382da81ccf2161873c99e94899662ef6"
+  integrity sha512-2VCRaA1LWOa/QoXuPEe+2efs5VsbF9U7mFL5DGUYv5NcOGD9MZY+t3xmrVh4ng7+shyI5XZxviSdAeqPPCgaVQ==
   dependencies:
     "@aws-cdk/cloud-assembly-schema" "1.48.0"
     semver "^7.2.2"
