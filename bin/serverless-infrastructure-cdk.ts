@@ -8,4 +8,5 @@ new ServerlessInfrastructureCdkStack(app, 'ServerlessInfrastructureCdkStack', {
   projectName: 'serverless-infrastructure',
   clientName: 'test-client',
   env: Envs.DEV,
+  region: 'eu-central-1',
 });

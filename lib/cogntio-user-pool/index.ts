@@ -58,5 +58,6 @@ export class UserPoolService extends cdk.Construct {
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
     });
     this.userPoolName = userPool.userPoolProviderName;
+    this.userPoolId = userPool.userPoolId;
   }
 }
