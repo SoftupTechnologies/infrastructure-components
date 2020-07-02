@@ -33,6 +33,19 @@
     "@aws-cdk/core" "1.47.0"
     constructs "^3.0.2"
 
+"@aws-cdk/aws-cloudformation@1.47.0":
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cloudformation/-/aws-cloudformation-1.47.0.tgz#e771a41e8b7f4bd93f6a2abc9e3262e00b7c51d3"
+  integrity sha512-PPmvLPjQPRJN2SySrlJCTjXdV1C5ki26C3YZMF3ICz58cgQgjwGzX/oUN8QeNS9909HeGDB7QwRUz7GrgObhVw==
+  dependencies:
+    "@aws-cdk/aws-iam" "1.47.0"
+    "@aws-cdk/aws-lambda" "1.47.0"
+    "@aws-cdk/aws-s3" "1.47.0"
+    "@aws-cdk/aws-sns" "1.47.0"
+    "@aws-cdk/core" "1.47.0"
+    "@aws-cdk/cx-api" "1.47.0"
+    constructs "^3.0.2"
+
 "@aws-cdk/aws-cloudfront@^1.47.0":
   version "1.47.0"
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cloudfront/-/aws-cloudfront-1.47.0.tgz#01fb83a0796bc15f0b088364aacc671f6c7d8809"
@@ -53,6 +66,18 @@
   dependencies:
     "@aws-cdk/aws-iam" "1.47.0"
     "@aws-cdk/core" "1.47.0"
+    constructs "^3.0.2"
+
+"@aws-cdk/aws-cognito@^1.47.0":
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-cognito/-/aws-cognito-1.47.0.tgz#2fd2db32b483207912aa2ecdae1a1bf624996e88"
+  integrity sha512-NiKBVd7fZ7wazsmxPpTtrR9dkCSOaUjVrcSUkMgqjY3jOypH2/4hZIjm3askatCK0vmHOxjvIjiAsdSEJ/0onw==
+  dependencies:
+    "@aws-cdk/aws-certificatemanager" "1.47.0"
+    "@aws-cdk/aws-iam" "1.47.0"
+    "@aws-cdk/aws-lambda" "1.47.0"
+    "@aws-cdk/core" "1.47.0"
+    "@aws-cdk/custom-resources" "1.47.0"
     constructs "^3.0.2"
 
 "@aws-cdk/aws-ec2@1.47.0", "@aws-cdk/aws-ec2@^1.47.0":
@@ -282,6 +307,19 @@
     constructs "^3.0.2"
     fs-extra "^9.0.1"
     minimatch "^3.0.4"
+
+"@aws-cdk/custom-resources@1.47.0":
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/custom-resources/-/custom-resources-1.47.0.tgz#84030e41f47b8d51b36331aa5ffcdb157bf61def"
+  integrity sha512-gNep91ZsIIqEMtvjBQVcfIZ5IbCDTFFExE8sHZlRDdJGoZioCn849iN3v9v8l65joA/047urb9oCTSyn32yscw==
+  dependencies:
+    "@aws-cdk/aws-cloudformation" "1.47.0"
+    "@aws-cdk/aws-iam" "1.47.0"
+    "@aws-cdk/aws-lambda" "1.47.0"
+    "@aws-cdk/aws-logs" "1.47.0"
+    "@aws-cdk/aws-sns" "1.47.0"
+    "@aws-cdk/core" "1.47.0"
+    constructs "^3.0.2"
 
 "@aws-cdk/cx-api@1.47.0":
   version "1.47.0"
