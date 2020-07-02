@@ -178,7 +178,7 @@
     "@aws-cdk/core" "1.47.0"
     constructs "^3.0.2"
 
-"@aws-cdk/aws-s3-assets@1.47.0":
+"@aws-cdk/aws-s3-assets@1.47.0", "@aws-cdk/aws-s3-assets@^1.47.0":
   version "1.47.0"
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-s3-assets/-/aws-s3-assets-1.47.0.tgz#68c7833ee86e0335bede4875f84d88c6db348223"
   integrity sha512-BcHGk5RmblEjmvXQ1fyPeLC58nSdpjuubQvvI1sJ7LSxOx7evZB5dZrDZH+7m+N+KszlWsIHYVUXpKBuEAT5bQ==

@@ -1,0 +1,68 @@
+Arguments: 
+  /usr/local/Cellar/node/11.13.0/bin/node /usr/local/Cellar/yarn/1.15.2/libexec/bin/yarn.js add aws-s3-assets
+
+PATH: 
+  /usr/local/opt/icu4c/sbin:/usr/local/opt/icu4c/bin:/usr/local/opt/node/bin:/bin:/usr/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/opt/icu4c/sbin:/usr/local/opt/icu4c/bin:/usr/local/opt/node/bin
+
+Yarn version: 
+  1.15.2
+
+Node version: 
+  12.11.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/aws-s3-assets: Not found
+      at Request.params.callback [as _callback] (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:66058:18)
+      at Request.self.callback (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:129541:22)
+      at Request.emit (events.js:210:5)
+      at Request.<anonymous> (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:130513:10)
+      at Request.emit (events.js:210:5)
+      at IncomingMessage.<anonymous> (/usr/local/Cellar/yarn/1.15.2/libexec/lib/cli.js:130435:12)
+      at Object.onceWrapper (events.js:299:28)
+      at IncomingMessage.emit (events.js:215:7)
+      at endReadableNT (_stream_readable.js:1183:12)
+      at processTicksAndRejections (internal/process/task_queues.js:80:21)
+
+npm manifest: 
+  {
+    "name": "serverless-infrastructure-cdk",
+    "version": "0.1.0",
+    "bin": {
+      "serverless-infrastructure-cdk": "bin/serverless-infrastructure-cdk.js"
+    },
+    "scripts": {
+      "build": "tsc",
+      "watch": "tsc -w",
+      "test": "jest",
+      "cdk": "cdk"
+    },
+    "devDependencies": {
+      "@aws-cdk/assert": "1.47.0",
+      "@types/jest": "^26.0.3",
+      "@types/node": "14.0.14",
+      "aws-cdk": "1.47.0",
+      "jest": "^26.1.0",
+      "ts-jest": "^26.1.1",
+      "ts-node": "^8.1.0",
+      "typescript": "~3.9.5"
+    },
+    "dependencies": {
+      "@aws-cdk/aws-cloudfront": "^1.47.0",
+      "@aws-cdk/aws-ec2": "^1.47.0",
+      "@aws-cdk/aws-rds": "^1.47.0",
+      "@aws-cdk/aws-s3": "^1.47.0",
+      "@aws-cdk/aws-sns": "1.47.0",
+      "@aws-cdk/aws-sns-subscriptions": "1.47.0",
+      "@aws-cdk/aws-sqs": "1.47.0",
+      "@aws-cdk/core": "1.47.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
