@@ -43,8 +43,9 @@ export class UserPoolService extends cdk.Construct {
         }
       },
       customAttributes: {
-        'isTeacher': new cognito.BooleanAttribute({mutable: true}),
-        'isStudent': new cognito.BooleanAttribute({mutable: true}),
+        'role': new cognito.StringAttribute({ mutable: true }),
+        'isTeacher': new cognito.BooleanAttribute({ mutable: true }),
+        'isStudent': new cognito.BooleanAttribute({ mutable: true }),
       },
       passwordPolicy: {
         minLength: 8,
