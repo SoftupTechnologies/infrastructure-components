@@ -8,6 +8,7 @@ export interface RdsInfrastructureProps {
   env: Envs,
   clientName: string,
   dbMasterUserName: string,
+  dbMasterUserPassword?: string,
   vpc: ec2.Vpc,
   databaseName: string,
   ingressSgs?: ec2.SecurityGroup[],
@@ -30,10 +31,23 @@ export class RdsInfrastructure extends cdk.Construct {
       vpcPlacement.subnets = props.dbSubnets;
     }
 
+    const defaultSg = new ec2.SecurityGroup(this, 'DefaultSgForVpcAddresses', {
+      vpc: props.vpc,
+      securityGroupName: 'Connections from vpc',
+    });
+
+    defaultSg.addIngressRule(
+      ec2.Peer.ipv4(props.vpc.vpcCidrBlock),
+      ec2.Port.tcp(5432),
+    );
+
+    const ingressSgs = props.ingressSgs || [];
+
     this.instance = new rds.DatabaseInstance(this, 'RdsDbInstance', {
       engine: rds.DatabaseInstanceEngine.POSTGRES,
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
       masterUsername: props.dbMasterUserName,
+      masterUserPassword: new cdk.SecretValue(props.dbMasterUserPassword),
       vpc: props.vpc,
       databaseName: props.databaseName,
       instanceIdentifier: `${props.projectName}-db-instance-${props.env}`,
@@ -42,7 +56,7 @@ export class RdsInfrastructure extends cdk.Construct {
       backupRetention: cdk.Duration.days(1),
       vpcPlacement,
       deletionProtection: props.env === Envs.PROD ? true : false,
-      securityGroups: props.ingressSgs,
+      securityGroups: [defaultSg, ...ingressSgs],
     });
   }
 }

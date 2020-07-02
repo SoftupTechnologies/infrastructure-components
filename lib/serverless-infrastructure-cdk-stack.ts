@@ -70,8 +70,6 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       value: props.region,
     });
 
-
-
     // const myVpc = new MyVpc(this, `MyVpc-${props.env}`, {
     //   vpcCidr: '10.0.0.0/16',
     //   maxAzs: 2,
