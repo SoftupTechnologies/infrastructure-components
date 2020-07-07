@@ -4,7 +4,7 @@ import { ServerlessInfrastructureCdkStack } from '../lib/serverless-infrastructu
 import { Envs } from '../types/envs'
 
 const app = new cdk.App();
-new ServerlessInfrastructureCdkStack(app, 'ServerlessInfrastructureCdkStack', {
+new ServerlessInfrastructureCdkStack(app, 'Test', {
   projectName: 'serverless-infrastructure',
   clientName: 'test-client',
   env: Envs.DEV,

@@ -21,8 +21,12 @@ interface StackProps {
 export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
     super(scope, id);
-    const artifactBucket = new ArtifactsBucket(this, `ArtifactsBucket-${props.env}`, {
-      artifactBucketName: `${props.projectName}-artifacts-bucket-${props.clientName}-${props.env}`,
+    const myVpc = new MyVpc(this, `MyVpc-${props.env}`, {
+      vpcCidr: '10.0.0.0/16',
+      maxAzs: 2,
+      publicSubnetsNo: 2,
+      privateSubnetsNo: 2,
+      isolatedSubnetsNo: 1,
       tags: [
         {
           key: 'cost-center',
@@ -34,65 +38,6 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
         }
       ]
     });
-
-    const userPool = new UserPoolService(this, 'UserPoolServices', {
-      ...props,
-      productName: 'Serverless users',
-    });
-
-    const ps = new ParameterStore(this, 'ParameterStoreVars', {
-      parameterName: 'stack-variables',
-      value: props,
-    });
-
-    new cdk.CfnOutput(this, 'StackVariables', {
-      value: ps.parameter.stringValue,
-      exportName: 'StackVariables',
-    });
-
-    new cdk.CfnOutput(this, 'ServiceArtifactBucketName', {
-      exportName: 'ServiceArtifactBucketName',
-      value: artifactBucket.bucketName,
-    });
-
-    new cdk.CfnOutput(this, 'UserPoolId', {
-      exportName: 'UserPoolId',
-      value: userPool.userPoolId,
-    });
-
-    new cdk.CfnOutput(this, 'UserPoolName', {
-      exportName: 'UserPoolName',
-      value: userPool.userPoolName,
-    });
-
-    new cdk.CfnOutput(this, 'Region', {
-      exportName: 'Region',
-      value: props.region,
-    });
-
-    // const myVpc = new MyVpc(this, `MyVpc-${props.env}`, {
-    //   vpcCidr: '10.0.0.0/16',
-    //   maxAzs: 2,
-    //   tags: [
-    //     {
-    //       key: 'cost-center',
-    //       value: props.clientName,
-    //     },
-    //     {
-    //       key: 'project',
-    //       value: props.projectName,
-    //     }
-    //   ]
-    // });
-
-    // new BastionHostServices(this, 'BastionServices', {
-    //   ...props,
-    //   vpc: myVpc.vpc,
-    //   instanceName: 'test',
-    //   subnets: [myVpc.vpc.publicSubnets[0]],
-    //   keyName: 'serverless-bastion-host',
-    // });
-
 
     // const caInfrastructure = new ClientAppInfrastructure(this, 'ClientAppInfrastructure', {
     //   clientAppBucketName: `${props.projectName}-client-app-bucket-${props.clientName}-${props.env}`,

@@ -6,81 +6,61 @@ import { tagConstruct } from '../../helpers/index';
 
 export interface VpcProps {
   vpcCidr: string;
-  publicSubnetProps?: SubnetProps[];
-  privateSubnetProps?: SubnetProps[];
   tags?: Tags;
   maxAzs?: number;
+  publicSubnetsNo: number;
+  privateSubnetsNo?: number;
+  isolatedSubnetsNo?: number;
 }
 
 export class MyVpc extends cdk.Construct {
-  public readonly privateSubnets: ec2.PrivateSubnet[] = [];
-  public readonly publicSubnets: ec2.PublicSubnet[] = [];
   public readonly vpc: ec2.Vpc;
-  public readonly subnetsForBastionHost: ec2.Subnet[] = [];
 
   constructor(scope: cdk.Construct, id: string, props: VpcProps) {
     super(scope, id);
 
+    const subnetConfig: ec2.SubnetConfiguration[] = [];
+
+    const { publicSubnetsNo, privateSubnetsNo, isolatedSubnetsNo } = props;
+
+    if (publicSubnetsNo) {
+      for (let i = 0; i < publicSubnetsNo; i ++) {
+        subnetConfig.push({
+          cidrMask: 24,
+          name: `public-${i + 1}`,
+          subnetType: ec2.SubnetType.PUBLIC,
+        });
+      }
+    }
+
+    if (privateSubnetsNo) {
+      for (let i = 0; i < privateSubnetsNo; i ++) {
+        subnetConfig.push({
+          cidrMask: 24,
+          name: `private-${i + 1}`,
+          subnetType: ec2.SubnetType.PRIVATE,
+        });
+      }
+    }
+
+    if (isolatedSubnetsNo) {
+      for (let i = 0; i < isolatedSubnetsNo; i ++) {
+        subnetConfig.push({
+          cidrMask: 24,
+          name: `isolated-${i + 1}`,
+          subnetType: ec2.SubnetType.ISOLATED,
+        });
+      }
+    }
+
     const vpc = new ec2.Vpc(this, 'MyVpc', {
       cidr: props.vpcCidr,
       maxAzs: props.maxAzs,
-      subnetConfiguration: [{
-        cidrMask: 24,
-        name: 'default-public-subnet',
-        subnetType: ec2.SubnetType.PUBLIC,
-      }],
+      subnetConfiguration: subnetConfig,
     });
 
     this.vpc = vpc;
 
-    const { privateSubnetProps, publicSubnetProps, tags } = props;
-
-    privateSubnetProps?.forEach((privSubProps, i) => {
-      const privateSubnet = new ec2.PrivateSubnet(this, `MyPrivateSubnet${i}`, {
-        cidrBlock: privSubProps.cidr,
-        vpcId: vpc.vpcId,
-        availabilityZone: privSubProps.az,
-        mapPublicIpOnLaunch: !!privSubProps.mapPublicIpOnLaunch
-      });
-
-      tagConstruct(privateSubnet, tags);
-
-      if (privSubProps.withBastionHost) {
-        this.subnetsForBastionHost.push(privateSubnet);
-      }
-
-      this.privateSubnets.push(
-        privateSubnet
-      );
-    });
-
-    publicSubnetProps?.forEach((pubSubProps, i) => {
-      const publicSubnet = new ec2.PublicSubnet(this, `MyPublicSubnet${i}`, {
-        cidrBlock: pubSubProps.cidr,
-        vpcId: vpc.vpcId,
-        availabilityZone: pubSubProps.az,
-        mapPublicIpOnLaunch: !!pubSubProps.mapPublicIpOnLaunch
-      })
-
-      tagConstruct(publicSubnet, tags);
-
-      tags?.forEach((tag) => {
-        cdk.Tag.add(publicSubnet, tag.key, tag.value);
-      });
-
-      if (pubSubProps.withNatGateway) {
-        publicSubnet.addNatGateway();
-      }
-
-      if (pubSubProps.withBastionHost) {
-        this.subnetsForBastionHost.push(publicSubnet);
-      }
-
-      this.publicSubnets.push(
-        publicSubnet
-      );
-    });
-
-    tagConstruct(vpc, tags);
+    tagConstruct(vpc, props.tags);
   }
 }
