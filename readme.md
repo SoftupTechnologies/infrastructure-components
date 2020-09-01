@@ -1,20 +1,51 @@
 ### Serverless - Reference Infrastructure
 
-This repository contains the list of resources that are common for creating the infrastructure of the serverless application.
-Every resource that is not coupled with a particular service should be added in the infrastructure repository.
+This repository contains the list of resources that are common for creating the infrastructure of an application. Components like a VPC (Virtual Private Cloud), subnets, server instances, database services like RDS (Relational Database Service), authentication with AWS Cognito etc...
+We will describe each component in upcomming steps. 
 
-#### VPC
-TODO: Add here a diagram
+- [Setup](#setup)
+  - [AWS sdk setup](#aws-sdk-setup)
+  - [AWS cdk installation](#aws-cdk-installation)
+- [Components](#components)
+  - [Vpc](#vpc)
+  - [Rds](#rds)
+  - [Secrets manager](#secrets-manager)
+  - [Bastion Host](#bastion-host)
+  - [Artifacts Bucket](#artifacts-bucket)
+  - [Client application bucket](#client-application-bucket)
+  - [Cognito user pool](#cognito-user-pool)
+  - [Parameter store](#parameter-store)
+- [Usage](#usage)
+- [Creating a simple stack example](#creating-a-simple-stack-example)
 
-#### S3
-We use some common buckets such as:
+## Setup
 
-- **{project-name}**-artifacts-**{environment}**: Store all artefacts created by different services.
-- **{project-name}**-public-keys-**{environment}**: Store all public keys that are used to access via SSH the bastion host.
+### AWS sdk setup
 
-#### Bastion Host
-In order to access services in private subnet, such as RDS, we would need a bastion host in public subnet that fetches keys from a private repository.
+### AWS cdk installation
+
+## Components
+
+### Vpc
+
+### Rds
+
+### Secrets manager
+
+### Bastion Host
+
+### Artifacts Bucket
+
+### Client application bucket
+
+### Cognito user pool
+
+### Parameter store
+
+## Usage
+
+## Creating a simple stack example
 
 
-#### Steps when onboarding new project
-Write detailed steps on how to onboard a new project to use the infrastructure
+
+
