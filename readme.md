@@ -3,7 +3,7 @@
 This repository contains the list of resources that are common for creating the infrastructure of an application. Components like a VPC (Virtual Private Cloud), subnets, server instances, database services like RDS (Relational Database Service), authentication with AWS Cognito etc...
 We will describe each component in upcomming steps. 
 
-- [Markdown Header Setup](#markdown-header-setup)
+- [Setup](#setup)
   - [AWS sdk setup](#aws-sdk-setup)
   - [AWS cdk installation](#aws-cdk-installation)
 - [Components](#components)
@@ -18,7 +18,7 @@ We will describe each component in upcomming steps.
 - [Usage](#usage)
 - [Creating a simple stack example](#creating-a-simple-stack-example)
 
-## Markdown Header Setup
+## Setup
 
 ### AWS sdk setup
 
