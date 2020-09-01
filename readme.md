@@ -18,6 +18,7 @@ We will describe each component in upcomming steps.
 - [Usage](#usage)
 - [Creating a simple stack example](#creating-a-simple-stack-example)
 
+<a name="setup"></a>
 ## Setup
 
 ### AWS sdk setup
