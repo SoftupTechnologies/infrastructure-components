@@ -61,7 +61,29 @@ And run:
 `cdk init app --language typescript`
 
 The cdk cli will generate the environment we need to develop the components.
+If you have a specific profile name in your aws configuration, rather than the **default** one, you must set the AWS_PROFILE variable before executing aws cdk commands.
 
+`export AWS_PROFILE=[PROFILE NAME]`
+
+To create the toolkit that will manage the resources in cloudformation run:
+
+`cdk bootstrap`
+
+This creates a toolkit which cdk uses to make stack diffs and other duties.
+
+Other commands:
+
+`yarn watch` to always transpile the TS to JS and check for errors.
+
+`cdk diff` to see the changes in resources before deploying the stack.
+
+`cdk deploy` deploys the stack to cloudformation (Will ask for confirmation).
+
+`cdk deploy --require-approval never` to skip the confirmation.
+
+`cdk destroy` to delete the created cloudformation stack (Will ask for confirmation).
+
+`cdk destroy --force` to skip the confirmation.
 
 ## Components
 
