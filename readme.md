@@ -8,6 +8,7 @@ We will describe each component in upcomming steps.
   - [AWS cdk installation](#aws-cdk-installation)
 - [Components](#components)
   - [Vpc](#vpc)
+    - [Properties](#properties)
   - [Rds](#rds)
   - [Secrets manager](#secrets-manager)
   - [Bastion Host](#bastion-host)
@@ -160,7 +161,21 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
 This will create a vpc with 2 AZs (Availabilaty zones), 2 public subnets and 1 subnet for each AZ.
 
+#### Properties
+
+Name | Type | Required | Default value | Description
+-----|------|----------|---------------|-------------
+vpcCidr | string | true | undefined | The CIDR block of addresses available in vpc.
+maxAzs | number | false | undefined | Number of Availability Zones (AZ) for the vpc.
+publicSubnetsNo | number | true | undefined | Public subnet number per AZ.
+privateSubnetsNo | number | false | undefined | Private subnet number per AZ.
+isolatedSubnetsNo | number | false | undefined | Isolated subnet number per AZ.
+
 ### Rds
+
+Path: `/lib/rds/index.ts`
+
+Exports: `RdsInfrastructure`
 
 ### Secrets manager
 
