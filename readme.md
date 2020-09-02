@@ -137,6 +137,8 @@ Path: `/lib/vpc/index.ts`
 
 Exports: `MyVpc`
 
+Required construct packages: `@aws-cdk/aws-ec2`
+
 The custom construct **MyVpc** wraps a common configuration for creating a vpc by just giving it some basic requirements, like vpc CIDR block and number of public subnets you need in the vpc.
 
 Calling the **MyVpc** class in the main stack:
@@ -154,7 +156,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       publicSubnetsNo: 2,
       maxAzs: 2,
       privateSubnetsNo: 1,
-    })
+    });
   }
 }
 ```
@@ -176,6 +178,46 @@ isolatedSubnetsNo | number | false | undefined | Isolated subnet number per AZ.
 Path: `/lib/rds/index.ts`
 
 Exports: `RdsInfrastructure`
+
+Required construct packages: `@aws-cdk/aws-ec2`, `@aws-cdk/aws-rds`
+
+This construct creates a RDS database instance with your desired database engine that AWS supports. The instance by default will accept connections only from the ip ranges of the vpc. To allow extra ingress trafic in your database you need to pass an array of **Security groups**.
+
+You can configure the database placement in the vpc by setting one of these two props: `publicAccessible` or `dbSubnets`. The first one will add the RDS instance in the public subnet of your vpc.
+
+Calling the **RdsInfrastructure** class in the main stack:
+
+```
+import * as cdk from '@aws-cdk/core';
+import { RdsInfrastructure } from './vpc';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const vpc = new MyVpc(this, 'MyAwesomeVpc', {
+      vpcCidr: 10.0.0.0/16,
+      publicSubnetsNo: 2,
+      maxAzs: 2,
+      privateSubnetsNo: 1,
+    });
+
+    // props include the projectName, clientName and env
+
+    const db = new RdsInfrastructure(this, 'MyCoolDbService', {
+      ...props,
+      dbMasterUserName: coolUsername,
+      vpc,
+      databaseName: coolDatabase,
+      publicAccessible: true,
+      dbAllocatedStorage: 10,
+      dbBackupRetention: 30,
+    });
+  }
+}
+```
+
+This will create a database instance and place it in one of our public subnets. Since we dont define a password for our database, it will automatically generate one and store it in **Secrets Manager service**.
 
 ### Secrets manager
 

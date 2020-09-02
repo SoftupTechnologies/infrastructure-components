@@ -15,6 +15,10 @@ export interface RdsInfrastructureProps {
   dbPort?: number,
   dbSubnets?: ec2.ISubnet[],
   publicAccessible?: boolean,
+  dbEngine?: rds.IInstanceEngine,
+  dbInstanceType?: ec2.InstanceType,
+  dbAllocatedStorage?: number,
+  dbBackupRetention?: number,
 }
 
 export class RdsInfrastructure extends cdk.Construct {
@@ -22,6 +26,9 @@ export class RdsInfrastructure extends cdk.Construct {
 
   constructor(scope: cdk.Construct, id: string, props: RdsInfrastructureProps) {
     super(scope, id);
+
+    const defaultEngine = rds.DatabaseInstanceEngine.POSTGRES;
+    const defaultPort = 5432;
 
     const vpcPlacement: any = {};
 
@@ -38,23 +45,23 @@ export class RdsInfrastructure extends cdk.Construct {
 
     defaultSg.addIngressRule(
       ec2.Peer.ipv4(props.vpc.vpcCidrBlock),
-      ec2.Port.tcp(5432),
+      ec2.Port.tcp(props.dbPort || defaultPort),
     );
 
     const ingressSgs = props.ingressSgs || [];
 
     this.instance = new rds.DatabaseInstance(this, 'RdsDbInstance', {
-      engine: rds.DatabaseInstanceEngine.POSTGRES,
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
+      engine: props.dbEngine || defaultEngine,
+      instanceType: props.dbInstanceType || ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
       masterUsername: props.dbMasterUserName,
-      masterUserPassword: new cdk.SecretValue(props.dbMasterUserPassword),
+      masterUserPassword: props.dbMasterUserPassword ? new cdk.SecretValue(props.dbMasterUserPassword) : undefined,
       vpc: props.vpc,
       databaseName: props.databaseName,
       instanceIdentifier: `${props.projectName}-db-instance-${props.env}`,
-      allocatedStorage: props.env === Envs.PROD ? 20 : 5,
-      port: props.dbPort || 5432,
-      backupRetention: cdk.Duration.days(1),
-      vpcPlacement,
+      allocatedStorage: props.dbAllocatedStorage || (props.env === Envs.PROD ? 20 : 5),
+      port: props.dbPort || defaultPort,
+      backupRetention: props.dbBackupRetention ? cdk.Duration.days(props.dbBackupRetention) : cdk.Duration.days(10),
+      vpcPlacement: Object.keys(vpcPlacement).length ? vpcPlacement : undefined,
       deletionProtection: props.env === Envs.PROD ? true : false,
       securityGroups: [defaultSg, ...ingressSgs],
     });
