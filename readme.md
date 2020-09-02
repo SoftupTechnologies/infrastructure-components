@@ -87,7 +87,78 @@ Other commands:
 
 ## Components
 
+All the components are found int the `/lib` folder in our cdk project. All the components are called in the main `/lib` file which the cli has created for us, in our case is `/lib/serverless-infrastructure-cdk-stack.ts`.
+
+We will add our components inside this block of code:
+
+```
+import * as cdk from '@aws-cdk/core';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+  }
+}
+```
+
+These are the main props that we have on our stack. Based on **project name**, **client name** and *environment* we can compose our resource namings. The **region** prop is needed in the stack to get some common variables provided from aws cdk which are based on stack variables on **CloudFormation**.
+
+```
+interface StackProps {
+  projectName: string,
+  clientName: string,
+  region: string,
+  env: Envs,
+}
+```
+
+The entrypoint of our cdk app is inside `/bin` folder. Inside `/bin/serverless-infrastructure-cdk.d.ts` we call our composed stacks:
+
+```
+import * as cdk from '@aws-cdk/core';
+import { ServerlessInfrastructureCdkStack } from '../lib/serverless-infrastructure-cdk-stack';
+import { Envs } from '../types/envs'
+
+const app = new cdk.App();
+new ServerlessInfrastructureCdkStack(app, 'Test', {
+  projectName: 'my-cool-infrastructure',
+  clientName: 'my-cool-client',
+  env: Envs.DEV,
+  region: aws-region-here, // eu-centra-1, us-central-1 etc..
+});
+```
+
+This generates the stack with all our resources.
+
 ### Vpc
+
+Path: `/lib/vpc/index.ts`
+
+Exports: `MyVpc`
+
+The custom construct **MyVpc** wraps a common configuration for creating a vpc by just giving it some basic requirements, like vpc CIDR block and number of public subnets you need in the vpc.
+
+Calling the **MyVpc** class in the main stack:
+
+```
+import * as cdk from '@aws-cdk/core';
+import { MyVpc } from './vpc';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const vpc = new MyVpc(this, 'MyAwesomeVpc', {
+      vpcCidr: 10.0.0.0/16,
+      publicSubnetsNo: 2,
+      maxAzs: 2,
+      privateSubnetsNo: 1,
+    })
+  }
+}
+```
+
+This will create a vpc with 2 AZs (Availabilaty zones), 2 public subnets and 1 subnet for each AZ.
 
 ### Rds
 
