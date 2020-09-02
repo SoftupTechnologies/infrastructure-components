@@ -12,6 +12,7 @@ We will describe each component in upcomming steps.
   - [Rds](#rds)
     - [Properties](#properties-1)
   - [Secrets manager](#secrets-manager)
+    - [Properties](#properties-2)
   - [Bastion Host](#bastion-host)
   - [Artifacts Bucket](#artifacts-bucket)
   - [Client application bucket](#client-application-bucket)
@@ -241,8 +242,41 @@ dbAllocatedStorage | number | false | Envs.PROD => 20, Envs.DEV => 5 | Disk stor
 dbBackupRetention | number | false | 10 | Number of days for RDS service to store the database snapshots.
 multiAz | boolean | false | false | Specifies if the RDS will be highly available or not.
 
-
 ### Secrets manager
+
+Path: `/lib/secrets-manager/index.ts`
+
+Exports: `SecretsManager`
+
+Required construct packages: `@aws-cdk/aws-secretsmanager`
+
+This construct stores a json object in secrets manager and also generate a secret value.
+
+```
+import * as cdk from '@aws-cdk/core';
+import { SecretsManager } from './vpc';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const secret = new SecretsManager(this, 'SuperSecretData', {
+      secretName: superSecret,
+      secretValue: {
+        a: 1,
+        b: 2,
+      }
+    });
+  }
+}
+```
+
+#### Properties
+
+Name | Type | Required | Default | Description
+-----|------|----------|---------|------------
+secretName | string | true | undefined | Secret name to identify it in Secrets Manager service.
+secretValue | json | true | undefined | Secret value.
 
 ### Bastion Host
 
