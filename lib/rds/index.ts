@@ -19,6 +19,7 @@ export interface RdsInfrastructureProps {
   dbInstanceType?: ec2.InstanceType,
   dbAllocatedStorage?: number,
   dbBackupRetention?: number,
+  multiAz?: boolean,
 }
 
 export class RdsInfrastructure extends cdk.Construct {
@@ -64,6 +65,7 @@ export class RdsInfrastructure extends cdk.Construct {
       vpcPlacement: Object.keys(vpcPlacement).length ? vpcPlacement : undefined,
       deletionProtection: props.env === Envs.PROD ? true : false,
       securityGroups: [defaultSg, ...ingressSgs],
+      multiAz: !!props.multiAz,
     });
   }
 }

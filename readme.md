@@ -10,6 +10,7 @@ We will describe each component in upcomming steps.
   - [Vpc](#vpc)
     - [Properties](#properties)
   - [Rds](#rds)
+    - [Properties](#properties-1)
   - [Secrets manager](#secrets-manager)
   - [Bastion Host](#bastion-host)
   - [Artifacts Bucket](#artifacts-bucket)
@@ -217,7 +218,29 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 }
 ```
 
-This will create a database instance and place it in one of our public subnets. Since we dont define a password for our database, it will automatically generate one and store it in **Secrets Manager service**.
+This will create a database instance with Postgres engine and place it in our public subnets group. Since we dont define a password for our database, it will automatically generate one and store it in **Secrets Manager service** in AWS.
+
+#### Properties
+
+Name | Type | Required | Default value | Description
+-----|------|----------|---------------|-------------
+projectName | string | true | undefined | The project name, which is used to compose different names and defining keys.
+env | Envs { dev, stage, prod } | true | undefined | The environment, which is used to set different properties and compose different names and keys.
+clientName | string | true | undefined | The client name, which is used to compose different names and defining keys.
+dbMasterUserName | string | true | undefined | Database username.
+dbMasterUserPassword | string | false | undefined | Database password. If not set it will be generated automatically and will be stored in **Secrets Manager**
+vpc | ec2.Vpc | true | undefined | The Vpc in which the database will be set.
+databaseName | string | true | undefined | Name of the database that will be created.
+ingressSgs | ec2.SecurityGroup[] | false | undefined | Extra security groups for the database to accept connections beside the vpc ip range.
+dbPort | number | false | 5432 | Database port.
+dbEngine | rds.IInstanceEngine | false | rds.DatabaseInstanceEngine.POSTGRES | Database engine.
+dbSubnets | ec2.ISubnet[] | false | undefined | Subnets to place the database (sets vpcPlacement property for rds).
+publicAccessible | boolean | false | undefined | Places the database in public subnets group (sets vpcPlacement property for rds).
+dbInstanceType | ec2.InstanceType | false | ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO) | Database server instance type.
+dbAllocatedStorage | number | false | Envs.PROD => 20, Envs.DEV => 5 | Disk storage.
+dbBackupRetention | number | false | 10 | Number of days for RDS service to store the database snapshots.
+multiAz | boolean | false | false | Specifies if the RDS will be highly available or not.
+
 
 ### Secrets manager
 
