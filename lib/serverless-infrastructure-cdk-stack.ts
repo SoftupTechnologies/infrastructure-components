@@ -21,5 +21,31 @@ interface StackProps {
 export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
     super(scope, id);
+
+    const { vpc } = new MyVpc(this, 'MyAwesomeVpc', {
+      vpcCidr: '10.0.0.0/16',
+      publicSubnetsNo: 2,
+      maxAzs: 2,
+      privateSubnetsNo: 1,
+    });
+
+    const bastionHost = new BastionHostServices(this, 'BastionHost', {
+      ...props,
+      vpc,
+      subnets: [vpc.publicSubnets[0]],
+      instanceName: 'my-instance',
+      keyName: 'my-instance-key.pem',
+    });
+
+    const db = new RdsInfrastructure(this, 'MyCoolDbService', {
+      ...props,
+      dbMasterUserName: 'coolUsername',
+      vpc,
+      databaseName: 'coolDatabase',
+      dbAllocatedStorage: 10,
+      dbBackupRetention: 30,
+      dbSubnets: vpc.privateSubnets,
+      ingressSgs: [bastionHost.bastionHostSecurityGroup]
+    });
   }
 }

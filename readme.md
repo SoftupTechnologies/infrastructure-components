@@ -14,6 +14,7 @@ We will describe each component in upcomming steps.
   - [Secrets manager](#secrets-manager)
     - [Properties](#properties-2)
   - [Bastion Host](#bastion-host)
+    - [Properties](#properties-3)
   - [Artifacts Bucket](#artifacts-bucket)
   - [Client application bucket](#client-application-bucket)
   - [Cognito user pool](#cognito-user-pool)
@@ -153,8 +154,8 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
     super(scope, id);
 
-    const vpc = new MyVpc(this, 'MyAwesomeVpc', {
-      vpcCidr: 10.0.0.0/16,
+    const { vpc } = new MyVpc(this, 'MyAwesomeVpc', {
+      vpcCidr: '10.0.0.0/16',
       publicSubnetsNo: 2,
       maxAzs: 2,
       privateSubnetsNo: 1,
@@ -197,8 +198,8 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
     super(scope, id);
 
-    const vpc = new MyVpc(this, 'MyAwesomeVpc', {
-      vpcCidr: 10.0.0.0/16,
+    const { vpc } = new MyVpc(this, 'MyAwesomeVpc', {
+      vpcCidr: '10.0.0.0/16',
       publicSubnetsNo: 2,
       maxAzs: 2,
       privateSubnetsNo: 1,
@@ -208,9 +209,9 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
     const db = new RdsInfrastructure(this, 'MyCoolDbService', {
       ...props,
-      dbMasterUserName: coolUsername,
+      dbMasterUserName: 'coolUsername',
       vpc,
-      databaseName: coolDatabase,
+      databaseName: 'coolDatabase',
       publicAccessible: true,
       dbAllocatedStorage: 10,
       dbBackupRetention: 30,
@@ -280,6 +281,75 @@ secretValue | json | true | undefined | Secret value.
 
 ### Bastion Host
 
+Path: `/lib/bastion-host/index.ts`
+
+Exports: `BastionHostServices`
+
+Required construct packages: `@aws-cdk/aws-ec2`, `@aws-cdk/aws-s3`, `@aws-cdk/aws-iam`, `@aws-cdk/aws-s3-assets`
+
+Bastion host (BH) will serve us as a tunnel, to access instances or databases which are in the private subnets. The BH we have constructed is composed by an ec2 instance and s3 bucket. The bucket serves to store the users' public keys in the format **name.pub**. The instance polls the bucket every 3 minutes to check if there are new keys or removed keys and based on this it creates new users or removes existing ones. The instance logic is on a shell script (`/lib/bastion-host/user_data.sh`) which is loaded as [**user data**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html), and executed at instance creation time. The ec2 instance uses an **Amazon Linux 2 AMI**. To access the s3 bucket we have created a role for our instance which allows it to interact with the s3 bucket and also put logs in [**CloudWatch**](https://aws.amazon.com/cloudwatch/).
+
+```
+import * as cdk from '@aws-cdk/core';
+import { MyVpc } from './vpc';
+import { BastionHostServices } from './bastion-host';
+import { Envs } from '../types/envs';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const { vpc } = new MyVpc(this, 'MyAwesomeVpc', {
+      vpcCidr: '10.0.0.0/16',
+      publicSubnetsNo: 2,
+      maxAzs: 2,
+      privateSubnetsNo: 1,
+    });
+
+    const bastionHost = new BastionHostServices(this, 'BastionHost', {
+      ...props,
+      vpc,
+      subnets: [vpc.publicSubnets[0]],
+      instanceName: 'my-instance',
+      keyName: 'my-instance-key.pem',
+    });
+
+    // We create a database in vpc private subnets and attach the bastion host security group to the database instance so it can accept connections from the bastion host.
+
+    const db = new RdsInfrastructure(this, 'MyCoolDbService', {
+      ...props,
+      dbMasterUserName: 'coolUsername',
+      vpc,
+      databaseName: 'coolDatabase',
+      dbAllocatedStorage: 10,
+      dbBackupRetention: 30,
+      dbSubnets: vpc.privateSubnets,
+      ingressSgs: [bastionHost.bastionHostSecurityGroup]
+    });
+  }
+}
+```
+
+After the stack is created you can go on the s3 bucket and upload your public key `name.pub`. After 3 minutes you can access the instance `ssh name@instance-public-ip-or-dns`.
+
+To use the aws cli to upload the pub key you can run:
+
+`aws s3 cp ~/.ssh/id_rsa.pub s3://created-bucket-name/public-keys/name.pub`. It must have the **public-keys** prefix when you upload it since that is where the instance looks for keys.
+
+If you don't have a public key, you can follow the steps [here](https://www.ssh.com/ssh/keygen/), how to generate one.
+
+#### Properties
+
+Name | Type | Required | Default | Description
+-----|------|----------|---------|------------
+projectName | string | true | undefined | Project name
+clientName | string | true | undefined | Client name
+env | Envs { dev, stage, prod } | true | undefined | Environment
+subnets | ec2.ISubnet[] | true | undefined | Subnets in which the bastion host is placed.
+vpc | ec2.Vpc | true | undefined | Vpc in which the bastion host is created.
+instanceName | string | true | undefined | Bastion host instance name. The given name will be composed with projectName, clientName and env. Ex: **`${projectName}-${instanceName}-bastion-host-${env}`**.
+instanceType | ec2.InstanceType | false | T2 MICRO | Bastion host instance type.
+keyName | string | false | undefined | Name of the private key which is used for creating the instance in the case you want to access the instance as a master user.
 ### Artifacts Bucket
 
 ### Client application bucket
