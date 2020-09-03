@@ -55,5 +55,9 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
         value: 'Service Artifacts'
       }]
     });
+
+    const clientApp = new ClientAppInfrastructure(this, 'ClientApp', {
+      clientAppBucketName: 'web-app-1'
+    });
   }
 }

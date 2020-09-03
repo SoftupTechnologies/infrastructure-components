@@ -18,6 +18,7 @@ We will describe each component in upcomming steps.
   - [Artifacts Bucket](#artifacts-bucket)
     - [Properties](#properties-4)
   - [Client application bucket](#client-application-bucket)
+    - [Properties](#properties-5)
   - [Cognito user pool](#cognito-user-pool)
   - [Parameter store](#parameter-store)
 - [Usage](#usage)
@@ -388,6 +389,35 @@ artifactBucketName | string | true | undefined | Bucket name.
 tags | Tags { key: string, value: string }[] | false | undefined | Tags to add in the resource (Bucket).
 
 ### Client application bucket
+
+Path: `/lib/clientapp-bucket/index.ts`
+
+Exports: `ClientAppInfrastructure`
+
+Required construct packages: `@aws-cdk/aws-s3`
+
+This construct creates a s3 bucket configured as a static website host which serves the content through a [CloudFront](https://aws.amazon.com/cloudfront/) distribution.
+
+```
+import * as cdk from '@aws-cdk/core';
+import { ClientAppInfrastructure } from './clientapp-bucket';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const clientApp = new ClientAppInfrastructure(this, 'ClientApp', {
+      clientAppBucketName: 'web-app-1'
+    });
+  }
+}
+```
+
+#### Properties
+
+Name | Type | Required | Default | Description
+-----|------|----------|---------|------------
+clientAppBucketName | string | true | undefined | Bucket name.
 
 ### Cognito user pool
 

@@ -48,7 +48,6 @@ export class ClientAppInfrastructure extends cdk.Construct {
       principals: [oai.grantPrincipal],
     });
 
-
     const policyDocument = new PolicyDocument({
       assignSids: true,
       statements: [
