@@ -16,6 +16,7 @@ We will describe each component in upcomming steps.
   - [Bastion Host](#bastion-host)
     - [Properties](#properties-3)
   - [Artifacts Bucket](#artifacts-bucket)
+    - [Properties](#properties-4)
   - [Client application bucket](#client-application-bucket)
   - [Cognito user pool](#cognito-user-pool)
   - [Parameter store](#parameter-store)
@@ -192,7 +193,7 @@ Calling the **RdsInfrastructure** class in the main stack:
 
 ```
 import * as cdk from '@aws-cdk/core';
-import { RdsInfrastructure } from './vpc';
+import { RdsInfrastructure } from './rds';
 
 export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
@@ -255,7 +256,7 @@ This construct stores a json object in secrets manager and also generate a secre
 
 ```
 import * as cdk from '@aws-cdk/core';
-import { SecretsManager } from './vpc';
+import { SecretsManager } from './secrets-manager';
 
 export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props: StackProps) {
@@ -287,7 +288,7 @@ Exports: `BastionHostServices`
 
 Required construct packages: `@aws-cdk/aws-ec2`, `@aws-cdk/aws-s3`, `@aws-cdk/aws-iam`, `@aws-cdk/aws-s3-assets`
 
-Bastion host (BH) will serve us as a tunnel, to access instances or databases which are in the private subnets. The BH we have constructed is composed by an ec2 instance and s3 bucket. The bucket serves to store the users' public keys in the format **name.pub**. The instance polls the bucket every 3 minutes to check if there are new keys or removed keys and based on this it creates new users or removes existing ones. The instance logic is on a shell script (`/lib/bastion-host/user_data.sh`) which is loaded as [**user data**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html), and executed at instance creation time. The ec2 instance uses an **Amazon Linux 2 AMI**. To access the s3 bucket we have created a role for our instance which allows it to interact with the s3 bucket and also put logs in [**CloudWatch**](https://aws.amazon.com/cloudwatch/).
+Bastion host (BH) will serve us as a tunnel to access instances or databases which are in the private subnets. The BH we have constructed is composed by an ec2 instance and s3 bucket. The bucket serves to store the users' public keys in the format **name.pub**. The instance polls the bucket every 3 minutes to check if there are new keys or removed keys and based on this it creates new users or removes existing ones. The instance logic is on a shell script (`/lib/bastion-host/user_data.sh`) which is loaded as [**user data**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html), and executed at instance creation time. The ec2 instance uses an **Amazon Linux 2 AMI**. To access the s3 bucket we have created a role for our instance which allows it to interact with the s3 bucket and also put logs in [**CloudWatch**](https://aws.amazon.com/cloudwatch/).
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -350,7 +351,41 @@ vpc | ec2.Vpc | true | undefined | Vpc in which the bastion host is created.
 instanceName | string | true | undefined | Bastion host instance name. The given name will be composed with projectName, clientName and env. Ex: **`${projectName}-${instanceName}-bastion-host-${env}`**.
 instanceType | ec2.InstanceType | false | T2 MICRO | Bastion host instance type.
 keyName | string | false | undefined | Name of the private key which is used for creating the instance in the case you want to access the instance as a master user.
+
 ### Artifacts Bucket
+
+Path: `/lib/artifacts-bucket/index.ts`
+
+Exports: `ArtifactsBucket`
+
+Required construct packages: `@aws-cdk/aws-s3`
+
+This construct will create a private bucket to store our service artifacts, backups, or other sensitive data.
+
+```
+import * as cdk from '@aws-cdk/core';
+import { ArtifactsBucket } from './artifacts-bucket';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const artifactsBucket = new ArtifactsBucket(this, 'ArtifactStorage', {
+      artifactBucketName: 'artifact-bucket',
+      tags: [{
+        key: 'Name',
+        value: 'Service Artifacts'
+      }]
+    });
+  }
+}
+```
+#### Properties
+
+Name | Type | Required | Default | Description
+-----|------|----------|---------|------------
+artifactBucketName | string | true | undefined | Bucket name.
+tags | Tags { key: string, value: string }[] | false | undefined | Tags to add in the resource (Bucket).
 
 ### Client application bucket
 

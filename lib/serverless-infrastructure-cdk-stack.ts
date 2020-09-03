@@ -47,5 +47,13 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       dbSubnets: vpc.privateSubnets,
       ingressSgs: [bastionHost.bastionHostSecurityGroup]
     });
+
+    const artifactsBucket = new ArtifactsBucket(this, 'ArtifactStorage', {
+      artifactBucketName: 'artifact-bucket',
+      tags: [{
+        key: 'Name',
+        value: 'Service Artifacts'
+      }]
+    });
   }
 }
