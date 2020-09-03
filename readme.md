@@ -1,7 +1,7 @@
 ### Serverless - Reference Infrastructure
 
 This repository contains the list of resources that are common for creating the infrastructure of an application. Components like a VPC (Virtual Private Cloud), subnets, server instances, database services like RDS (Relational Database Service), authentication with AWS Cognito etc...
-We will describe each component in upcomming steps. 
+We will describe each component in upcoming steps. 
 
 - [Setup](#setup)
   - [AWS cli setup](#aws-cli-setup)
