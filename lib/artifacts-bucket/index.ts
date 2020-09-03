@@ -5,7 +5,7 @@ import { tagConstruct } from '../../helpers';
 
 export interface IProps {
   artifactBucketName: string;
-  tags: Tags;
+  tags?: Tags;
 };
 
 export class ArtifactsBucket extends cdk.Construct {

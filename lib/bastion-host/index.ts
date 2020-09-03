@@ -4,7 +4,6 @@ import * as s3 from '@aws-cdk/aws-s3';
 import * as iam from '@aws-cdk/aws-iam';
 import { Asset } from '@aws-cdk/aws-s3-assets';
 import path = require("path");
-import { tagConstruct } from '../../helpers';
 import { Envs } from './../../types/envs';
 
 

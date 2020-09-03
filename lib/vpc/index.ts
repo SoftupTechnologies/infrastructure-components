@@ -1,7 +1,6 @@
 import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import { Tags } from '../../types/tags';
-import { SubnetProps } from '../../types/subnets';
 import { tagConstruct } from '../../helpers/index';
 
 export interface VpcProps {
