@@ -8,21 +8,29 @@ We will describe each component in upcomming steps.
   - [AWS cdk installation](#aws-cdk-installation)
 - [Components](#components)
   - [Vpc](#vpc)
-    - [Properties](#properties)
+    - [Usage:](#usage)
+    - [Construct props](#construct-props)
   - [Rds](#rds)
-    - [Properties](#properties-1)
+    - [Usage:](#usage-1)
+    - [Construct props](#construct-props-1)
   - [Secrets manager](#secrets-manager)
-    - [Properties](#properties-2)
+    - [Usage:](#usage-2)
+    - [Construct props](#construct-props-2)
   - [Bastion Host](#bastion-host)
-    - [Properties](#properties-3)
+    - [Usage:](#usage-3)
+    - [Construct props](#construct-props-3)
   - [Artifacts Bucket](#artifacts-bucket)
-    - [Properties](#properties-4)
+    - [Usage:](#usage-4)
+    - [Construct props](#construct-props-4)
   - [Client application bucket](#client-application-bucket)
-    - [Properties](#properties-5)
+    - [Usage:](#usage-5)
+    - [Construct props](#construct-props-5)
   - [Cognito user pool](#cognito-user-pool)
-    - [Properties](#properties-6)
+    - [Usage:](#usage-6)
+    - [Construct props](#construct-props-6)
   - [Parameter store](#parameter-store)
-    - [Properties](#properties-7)
+    - [Usage:](#usage-7)
+    - [Construct props](#construct-props-7)
 
 ## Setup
 
@@ -146,7 +154,7 @@ Required construct packages: `@aws-cdk/aws-ec2`
 
 The custom construct **MyVpc** wraps a common configuration for creating a vpc by just giving it some basic requirements, like vpc CIDR block and number of public subnets you need in the vpc.
 
-Calling the **MyVpc** class in the main stack:
+#### Usage:
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -168,7 +176,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
 This will create a vpc with 2 AZs (Availabilaty zones), 2 public subnets and 1 subnet for each AZ.
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default value | Description
 -----|------|----------|---------------|-------------
@@ -190,7 +198,7 @@ This construct creates a RDS database instance with your desired database engine
 
 You can configure the database placement in the vpc by setting one of these two props: `publicAccessible` or `dbSubnets`. The first one will add the RDS instance in the public subnet of your vpc.
 
-Calling the **RdsInfrastructure** class in the main stack:
+#### Usage:
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -224,7 +232,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
 This will create a database instance with Postgres engine and place it in our public subnets group. Since we dont define a password for our database, it will automatically generate one and store it in **Secrets Manager service** in AWS.
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default | Description
 -----|------|----------|---------|---------------------
@@ -255,6 +263,8 @@ Required construct packages: `@aws-cdk/aws-secretsmanager`
 
 This construct stores a json object in secrets manager and also generate a secret value.
 
+#### Usage:
+
 ```
 import * as cdk from '@aws-cdk/core';
 import { SecretsManager } from './secrets-manager';
@@ -274,7 +284,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 }
 ```
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
@@ -290,6 +300,8 @@ Exports: `BastionHostServices`
 Required construct packages: `@aws-cdk/aws-ec2`, `@aws-cdk/aws-s3`, `@aws-cdk/aws-iam`, `@aws-cdk/aws-s3-assets`
 
 Bastion host (BH) will serve us as a tunnel to access instances or databases which are in the private subnets. The BH we have constructed is composed by an ec2 instance and s3 bucket. The bucket serves to store the users' public keys in the format **name.pub**. The instance polls the bucket every 3 minutes to check if there are new keys or removed keys and based on this it creates new users or removes existing ones. The instance logic is on a shell script (`/lib/bastion-host/user_data.sh`) which is loaded as [**user data**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html), and executed at instance creation time. The ec2 instance uses an **Amazon Linux 2 AMI**. To access the s3 bucket we have created a role for our instance which allows it to interact with the s3 bucket and also put logs in [**CloudWatch**](https://aws.amazon.com/cloudwatch/).
+
+#### Usage:
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -340,7 +352,7 @@ To use the aws cli to upload the pub key you can run:
 
 If you don't have a public key, you can follow the steps [here](https://www.ssh.com/ssh/keygen/), how to generate one.
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
@@ -351,7 +363,7 @@ subnets | ec2.ISubnet[] | true | undefined | Subnets in which the bastion host i
 vpc | ec2.Vpc | true | undefined | Vpc in which the bastion host is created.
 instanceName | string | true | undefined | Bastion host instance name. The given name will be composed with projectName, clientName and env. Ex: **`${projectName}-${instanceName}-bastion-host-${env}`**.
 instanceType | ec2.InstanceType | false | T2 MICRO | Bastion host instance type.
-keyName | string | false | undefined | Name of the private key which is used for creating the instance in the case you want to access the instance as a master user.
+keyName | string | false | undefined | Name of SSH keypair to grant access to instance.
 
 ### Artifacts Bucket
 
@@ -362,6 +374,8 @@ Exports: `ArtifactsBucket`
 Required construct packages: `@aws-cdk/aws-s3`
 
 This construct will create a private bucket to store our service artifacts, backups, or other sensitive data.
+
+#### Usage:
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -382,7 +396,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 }
 ```
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
@@ -399,6 +413,8 @@ Required construct packages: `@aws-cdk/aws-s3`
 
 This construct creates a s3 bucket configured as a static website host which serves the content through a [CloudFront](https://aws.amazon.com/cloudfront/) distribution.
 
+#### Usage:
+
 ```
 import * as cdk from '@aws-cdk/core';
 import { ClientAppInfrastructure } from './clientapp-bucket';
@@ -414,7 +430,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 }
 ```
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
@@ -429,6 +445,8 @@ Exports: `UserPoolService`
 Required construct packages: `@aws-cdk/aws-cognito`
 
 Creates a [**Amazon Cognito user pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html). With a user pool, your users can sign in to your web or mobile app through Amazon Cognito. To make it customizable for your use case, modify the properties in the **UserPoolService** class.
+
+#### Usage:
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -445,7 +463,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 }
 ```
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
@@ -462,6 +480,8 @@ Exports: `ParameterStore`
 Required construct packages: `@aws-cdk/aws-ssm`
 
 Creates a construct that stores key values in [**AWS Systems Manager**](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html) [**Parameter store**](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html).
+
+#### Usage:
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -481,7 +501,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 }
 ```
 
-#### Properties
+#### Construct props
 
 Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
