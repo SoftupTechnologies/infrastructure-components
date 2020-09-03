@@ -63,5 +63,12 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
     const userPool = new UserPoolService(this, 'UserPool', {
       ...props,
     });
+
+    const stackProps = new ParameterStore(this, 'SomeDataInSSMPS', {
+      parameterName: 'StackProps',
+      value: {
+        ...props,
+      }
+    });
   }
 }

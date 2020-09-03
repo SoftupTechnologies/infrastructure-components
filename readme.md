@@ -22,8 +22,7 @@ We will describe each component in upcomming steps.
   - [Cognito user pool](#cognito-user-pool)
     - [Properties](#properties-6)
   - [Parameter store](#parameter-store)
-- [Usage](#usage)
-- [Creating a simple stack example](#creating-a-simple-stack-example)
+    - [Properties](#properties-7)
 
 ## Setup
 
@@ -456,9 +455,39 @@ env | Envs { dev, stage, prod } | true | undefined | Environment
 
 ### Parameter store
 
-## Usage
+Path: `/lib/parameter-store/index.ts`
 
-## Creating a simple stack example
+Exports: `ParameterStore`
+
+Required construct packages: `@aws-cdk/aws-ssm`
+
+Creates a construct that stores key values in [**AWS Systems Manager**](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html) [**Parameter store**](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html).
+
+```
+import * as cdk from '@aws-cdk/core';
+import { ParameterStore } from './parameter-store';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const stackProps = new ParameterStore(this, 'SomeDataInSSMPS', {
+      parameterName: 'StackProps',
+      value: {
+        ...props,
+      }
+    });
+  }
+}
+```
+
+#### Properties
+
+Name | Type | Required | Default | Description
+-----|------|----------|---------|------------
+parameterName | string | true | undefined | Parameter name.
+value | string \| json { projectName, clientName, env } | true | undefined | Parameter value.
+
 
 
 
