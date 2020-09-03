@@ -10,6 +10,7 @@ export type ClientAppInfrastructureProps = {
 export class ClientAppInfrastructure extends cdk.Construct {
   public readonly clientAppDistributionId: string;
   public readonly clientAppCfDomainName: string;
+  public readonly clientAppBucket: s3.Bucket;
 
   constructor(scope: cdk.Construct, id: string, props: ClientAppInfrastructureProps) {
     super(scope, id);
@@ -19,7 +20,7 @@ export class ClientAppInfrastructure extends cdk.Construct {
     });
     
 
-    const clientAppBucket = new s3.Bucket(this, 'ClientAppBucket', {
+    this.clientAppBucket = new s3.Bucket(this, 'ClientAppBucket', {
       bucketName: props.clientAppBucketName,
       publicReadAccess: true,
       websiteIndexDocument: 'index.html',
@@ -30,7 +31,7 @@ export class ClientAppInfrastructure extends cdk.Construct {
       originConfigs: [
         {
           s3OriginSource: {
-            s3BucketSource: clientAppBucket,
+            s3BucketSource: this.clientAppBucket,
             originAccessIdentity: oai,
           },
           behaviors : [ {
@@ -44,7 +45,7 @@ export class ClientAppInfrastructure extends cdk.Construct {
     const policyStatement = new PolicyStatement({
       effect: Effect.ALLOW,
       actions: ['s3:GetObject'],
-      resources: [`${clientAppBucket.bucketArn}/*`],
+      resources: [`${this.clientAppBucket.bucketArn}/*`],
       principals: [oai.grantPrincipal],
     });
 
@@ -56,7 +57,7 @@ export class ClientAppInfrastructure extends cdk.Construct {
     });
 
     new s3.CfnBucketPolicy(this, 'ClientAppBucketPolicy', {
-      bucket: clientAppBucket.bucketName,
+      bucket: this.clientAppBucket.bucketName,
       policyDocument,
     });
 

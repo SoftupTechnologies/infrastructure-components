@@ -23,7 +23,7 @@ export interface RdsInfrastructureProps {
 }
 
 export class RdsInfrastructure extends cdk.Construct {
-  public readonly instance: rds.DatabaseInstance;
+  public readonly dbInstance: rds.DatabaseInstance;
 
   constructor(scope: cdk.Construct, id: string, props: RdsInfrastructureProps) {
     super(scope, id);
@@ -51,7 +51,7 @@ export class RdsInfrastructure extends cdk.Construct {
 
     const ingressSgs = props.ingressSgs || [];
 
-    this.instance = new rds.DatabaseInstance(this, 'RdsDbInstance', {
+    this.dbInstance = new rds.DatabaseInstance(this, 'RdsDbInstance', {
       engine: props.dbEngine || defaultEngine,
       instanceType: props.dbInstanceType || ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
       masterUsername: props.dbMasterUserName,

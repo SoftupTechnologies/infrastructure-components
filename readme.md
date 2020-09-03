@@ -8,29 +8,37 @@ We will describe each component in upcomming steps.
   - [AWS cdk installation](#aws-cdk-installation)
 - [Components](#components)
   - [Vpc](#vpc)
-    - [Usage:](#usage)
+    - [Usage](#usage)
     - [Construct props](#construct-props)
+    - [Properties](#properties)
   - [Rds](#rds)
-    - [Usage:](#usage-1)
+    - [Usage](#usage-1)
     - [Construct props](#construct-props-1)
+    - [Properties](#properties-1)
   - [Secrets manager](#secrets-manager)
-    - [Usage:](#usage-2)
+    - [Usage](#usage-2)
     - [Construct props](#construct-props-2)
+    - [Properties](#properties-2)
   - [Bastion Host](#bastion-host)
-    - [Usage:](#usage-3)
+    - [Usage](#usage-3)
     - [Construct props](#construct-props-3)
+    - [Properties](#properties-3)
   - [Artifacts Bucket](#artifacts-bucket)
-    - [Usage:](#usage-4)
+    - [Usage](#usage-4)
     - [Construct props](#construct-props-4)
+    - [Properties](#properties-4)
   - [Client application bucket](#client-application-bucket)
-    - [Usage:](#usage-5)
+    - [Usage](#usage-5)
     - [Construct props](#construct-props-5)
+    - [Properties](#properties-5)
   - [Cognito user pool](#cognito-user-pool)
-    - [Usage:](#usage-6)
+    - [Usage](#usage-6)
     - [Construct props](#construct-props-6)
+    - [Properties](#properties-6)
   - [Parameter store](#parameter-store)
-    - [Usage:](#usage-7)
+    - [Usage](#usage-7)
     - [Construct props](#construct-props-7)
+    - [Properties](#properties-7)
 
 ## Setup
 
@@ -154,7 +162,7 @@ Required construct packages: `@aws-cdk/aws-ec2`
 
 The custom construct **MyVpc** wraps a common configuration for creating a vpc by just giving it some basic requirements, like vpc CIDR block and number of public subnets you need in the vpc.
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -186,6 +194,12 @@ publicSubnetsNo | number | true | undefined | Public subnet number per AZ.
 privateSubnetsNo | number | false | undefined | Private subnet number per AZ.
 isolatedSubnetsNo | number | false | undefined | Isolated subnet number per AZ.
 
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+vpc | ec2.Vpc | Created vpc instance.
+
 ### Rds
 
 Path: `/lib/rds/index.ts`
@@ -198,7 +212,7 @@ This construct creates a RDS database instance with your desired database engine
 
 You can configure the database placement in the vpc by setting one of these two props: `publicAccessible` or `dbSubnets`. The first one will add the RDS instance in the public subnet of your vpc.
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -253,6 +267,12 @@ dbAllocatedStorage | number | false | Envs.PROD => 20, Envs.DEV => 5 | Disk stor
 dbBackupRetention | number | false | 10 | Number of days for RDS service to store the database snapshots.
 multiAz | boolean | false | false | Specifies if the RDS will be highly available or not.
 
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+dbInstance | rds.DatabaseInstance | Created database instance.
+
 ### Secrets manager
 
 Path: `/lib/secrets-manager/index.ts`
@@ -263,7 +283,7 @@ Required construct packages: `@aws-cdk/aws-secretsmanager`
 
 This construct stores a json object in secrets manager and also generate a secret value.
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -291,6 +311,12 @@ Name | Type | Required | Default | Description
 secretName | string | true | undefined | Secret name to identify it in Secrets Manager service.
 secretValue | json | true | undefined | Secret value.
 
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+secret | secretsmanager.Secret | Created secret instance.
+
 ### Bastion Host
 
 Path: `/lib/bastion-host/index.ts`
@@ -301,7 +327,7 @@ Required construct packages: `@aws-cdk/aws-ec2`, `@aws-cdk/aws-s3`, `@aws-cdk/aw
 
 Bastion host (BH) will serve us as a tunnel to access instances or databases which are in the private subnets. The BH we have constructed is composed by an ec2 instance and s3 bucket. The bucket serves to store the users' public keys in the format **name.pub**. The instance polls the bucket every 3 minutes to check if there are new keys or removed keys and based on this it creates new users or removes existing ones. The instance logic is on a shell script (`/lib/bastion-host/user_data.sh`) which is loaded as [**user data**](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html), and executed at instance creation time. The ec2 instance uses an **Amazon Linux 2 AMI**. To access the s3 bucket we have created a role for our instance which allows it to interact with the s3 bucket and also put logs in [**CloudWatch**](https://aws.amazon.com/cloudwatch/).
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -365,6 +391,13 @@ instanceName | string | true | undefined | Bastion host instance name. The given
 instanceType | ec2.InstanceType | false | T2 MICRO | Bastion host instance type.
 keyName | string | false | undefined | Name of SSH keypair to grant access to instance.
 
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+bastionHostInstance | ec2.Instance | Created ec2 bastion host instance.
+bastionHostSecurityGroup | ec2.SecurityGroup | Instance security group.
+
 ### Artifacts Bucket
 
 Path: `/lib/artifacts-bucket/index.ts`
@@ -375,7 +408,7 @@ Required construct packages: `@aws-cdk/aws-s3`
 
 This construct will create a private bucket to store our service artifacts, backups, or other sensitive data.
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -403,6 +436,14 @@ Name | Type | Required | Default | Description
 artifactBucketName | string | true | undefined | Bucket name.
 tags | Tags { key: string, value: string }[] | false | undefined | Tags to add in the resource (Bucket).
 
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+bucketName | string | Bucket name.
+bucketId | string | Bucket id.
+bucket | s3.Bucket | Created bucket instance.
+
 ### Client application bucket
 
 Path: `/lib/clientapp-bucket/index.ts`
@@ -413,7 +454,7 @@ Required construct packages: `@aws-cdk/aws-s3`
 
 This construct creates a s3 bucket configured as a static website host which serves the content through a [CloudFront](https://aws.amazon.com/cloudfront/) distribution.
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -436,6 +477,14 @@ Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
 clientAppBucketName | string | true | undefined | Bucket name.
 
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+clientAppCfDomainName | string | Domain name of cloud front distribution.
+clientAppDistributionId | string | Cloud front distribution id.
+clientAppBucket | s3.Bucket | Created bucket instance.
+
 ### Cognito user pool
 
 Path: `/lib/cognito-user-pool/index.ts`
@@ -446,7 +495,7 @@ Required construct packages: `@aws-cdk/aws-cognito`
 
 Creates a [**Amazon Cognito user pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html). With a user pool, your users can sign in to your web or mobile app through Amazon Cognito. To make it customizable for your use case, modify the properties in the **UserPoolService** class.
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -471,6 +520,14 @@ projectName | string | true | undefined | Project name
 clientName | string | true | undefined | Client name
 env | Envs { dev, stage, prod } | true | undefined | Environment
 
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+userPoolName | string | Created user pool name.
+userPoolId | string | Created user pool id.
+userPool | cognito.UserPool | Created user pool instance.
+
 ### Parameter store
 
 Path: `/lib/parameter-store/index.ts`
@@ -481,7 +538,7 @@ Required construct packages: `@aws-cdk/aws-ssm`
 
 Creates a construct that stores key values in [**AWS Systems Manager**](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html) [**Parameter store**](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html).
 
-#### Usage:
+#### Usage
 
 ```
 import * as cdk from '@aws-cdk/core';
@@ -507,6 +564,12 @@ Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
 parameterName | string | true | undefined | Parameter name.
 value | string \| json { projectName, clientName, env } | true | undefined | Parameter value.
+
+#### Properties
+
+Name | Type | Description
+-----|------|-------------
+parameter | ssm.StringParameter | Created parameter instance.
 
 
 
