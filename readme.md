@@ -20,6 +20,7 @@ We will describe each component in upcomming steps.
   - [Client application bucket](#client-application-bucket)
     - [Properties](#properties-5)
   - [Cognito user pool](#cognito-user-pool)
+    - [Properties](#properties-6)
   - [Parameter store](#parameter-store)
 - [Usage](#usage)
 - [Creating a simple stack example](#creating-a-simple-stack-example)
@@ -381,6 +382,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
   }
 }
 ```
+
 #### Properties
 
 Name | Type | Required | Default | Description
@@ -420,6 +422,37 @@ Name | Type | Required | Default | Description
 clientAppBucketName | string | true | undefined | Bucket name.
 
 ### Cognito user pool
+
+Path: `/lib/cognito-user-pool/index.ts`
+
+Exports: `UserPoolService`
+
+Required construct packages: `@aws-cdk/aws-cognito`
+
+Creates a [**Amazon Cognito user pool**](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html). With a user pool, your users can sign in to your web or mobile app through Amazon Cognito. To make it customizable for your use case, modify the properties in the **UserPoolService** class.
+
+```
+import * as cdk from '@aws-cdk/core';
+import { UserPoolService } from './cognito-user-pool';
+
+export class ServerlessInfrastructureCdkStack extends cdk.Stack {
+  constructor(scope: cdk.App, id: string, props: StackProps) {
+    super(scope, id);
+
+    const userPool = new UserPoolService(this, 'UserPool', {
+      ...props,
+    });
+  }
+}
+```
+
+#### Properties
+
+Name | Type | Required | Default | Description
+-----|------|----------|---------|------------
+projectName | string | true | undefined | Project name
+clientName | string | true | undefined | Client name
+env | Envs { dev, stage, prod } | true | undefined | Environment
 
 ### Parameter store
 

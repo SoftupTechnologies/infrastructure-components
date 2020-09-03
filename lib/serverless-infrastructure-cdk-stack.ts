@@ -8,7 +8,7 @@ import { ClientAppInfrastructure } from './clientapp-bucket';
 import { RdsInfrastructure } from './rds';
 import { Envs } from '../types/envs';
 import { cfnTagToCloudFormation } from '@aws-cdk/core';
-import { UserPoolService } from './cogntio-user-pool';
+import { UserPoolService } from './cognito-user-pool';
 import { ParameterStore } from './parameter-store';
 
 interface StackProps {
@@ -58,6 +58,10 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
     const clientApp = new ClientAppInfrastructure(this, 'ClientApp', {
       clientAppBucketName: 'web-app-1'
+    });
+
+    const userPool = new UserPoolService(this, 'UserPool', {
+      ...props,
     });
   }
 }

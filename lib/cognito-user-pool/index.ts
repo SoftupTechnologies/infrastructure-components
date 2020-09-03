@@ -1,11 +1,11 @@
 import * as cdk from '@aws-cdk/core';
 import * as cognito from '@aws-cdk/aws-cognito';
 import { Envs } from '../../types/envs';
-import { Duration } from '@aws-cdk/core';
+
+const { Duration } = cdk;
 
 interface UserPoolProps {
   projectName: string;
-  productName: string;
   clientName: string;
   env: Envs;
 }
@@ -17,14 +17,14 @@ export class UserPoolService extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: UserPoolProps) {
     super(scope, id);
 
-    const { projectName, env, productName } = props;
+    const { projectName, env } = props;
 
     const userPool = new cognito.UserPool(this, 'UserPoolService', {
       userPoolName: `${projectName}-user-pool-${env}`,
       selfSignUpEnabled: true,
       userVerification: {
-        emailSubject: `Verify your email for ${productName}!`,
-        emailBody: `Hello {username}, Thanks for signing up to ${productName}! Your verification code is {####}`,
+        emailSubject: `Verify your email for ${projectName}!`,
+        emailBody: `Hello {username}, Thanks for signing up to ${projectName}! Your verification code is {####}`,
         emailStyle: cognito.VerificationEmailStyle.CODE,
       },
       signInAliases: {
