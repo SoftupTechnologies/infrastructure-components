@@ -27,7 +27,7 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       vpcCidr: '10.0.0.0/16',
       publicSubnetsNo: 1,
       maxAzs: 2,
-      privateSubnetsNo: 1,
+      privateSubnetsNo: 3,
     });
 
     const { asg, alb } = new AsgStackWithAlb(this, 'MyAsg', {

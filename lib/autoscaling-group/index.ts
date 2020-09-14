@@ -43,10 +43,19 @@ export class AsgStackWithAlb extends cdk.Construct {
       open: true,
     });
 
+    /* Adding HTTPS listener example */
+
+    // const listener = this.alb.addListener('Listener', {
+    //   port: 443,
+    //   open: true,
+    //   protocol: elbv2.ApplicationProtocol.HTTPS,
+    //   certificates: [elbv2.ListenerCertificate.fromArn('Enter certificate arn')]
+    // });
+
     this.asgSecurityGroup = new ec2.SecurityGroup(this, 'AsgSecurityGroup', {
       vpc: props.vpc,
       allowAllOutbound: true,
-      description: 'Enables SSH Access to asg instances'
+      description: 'Default ASG security group'
     });
 
     this.asg = new autoscaling.AutoScalingGroup(this, 'Asg', {
