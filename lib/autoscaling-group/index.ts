@@ -61,9 +61,7 @@ export class AsgStackWithAlb extends cdk.Construct {
       autoScalingGroupName: props.autoScalingGroupName ? `${props.autoScalingGroupName}-${props.env}` : `${props.projectName}-asg-${props.env}`,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PRIVATE,
-      },
-      associatePublicIpAddress: false,
-      keyName: 'stivi-test-ec2-key-pair'
+      }
     });
 
     const userDataAsset = new Asset(this, 'UserDataAssetForAsg', {
