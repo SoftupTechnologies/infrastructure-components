@@ -10,6 +10,7 @@ import { Envs } from '../types/envs';
 import { cfnTagToCloudFormation } from '@aws-cdk/core';
 import { UserPoolService } from './cognito-user-pool';
 import { ParameterStore } from './parameter-store';
+import { AsgStackWithAlb } from './autoscaling-group';
 
 interface StackProps {
   projectName: string,
@@ -29,46 +30,15 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       privateSubnetsNo: 1,
     });
 
-    const bastionHost = new BastionHostServices(this, 'BastionHost', {
+    const { asg } = new AsgStackWithAlb(this, 'MyAsg', {
       ...props,
       vpc,
-      subnets: [vpc.publicSubnets[0]],
-      instanceName: 'my-instance',
-      keyName: 'my-instance-key.pem',
     });
 
-    const db = new RdsInfrastructure(this, 'MyCoolDbService', {
-      ...props,
-      dbMasterUserName: 'coolUsername',
-      vpc,
-      databaseName: 'coolDatabase',
-      dbAllocatedStorage: 10,
-      dbBackupRetention: 30,
-      dbSubnets: vpc.privateSubnets,
-      ingressSgs: [bastionHost.bastionHostSecurityGroup]
-    });
-
-    const artifactsBucket = new ArtifactsBucket(this, 'ArtifactStorage', {
-      artifactBucketName: 'artifact-bucket',
-      tags: [{
-        key: 'Name',
-        value: 'Service Artifacts'
-      }]
-    });
-
-    const clientApp = new ClientAppInfrastructure(this, 'ClientApp', {
-      clientAppBucketName: 'web-app-1'
-    });
-
-    const userPool = new UserPoolService(this, 'UserPool', {
-      ...props,
-    });
-
-    const stackProps = new ParameterStore(this, 'SomeDataInSSMPS', {
-      parameterName: 'StackProps',
-      value: {
-        ...props,
-      }
+    asg.scaleOnCpuUtilization('CpuUtilScaling', {
+      targetUtilizationPercent: 60,
+      cooldown: cdk.Duration.hours(2),
+      disableScaleIn: false,
     });
   }
 }
