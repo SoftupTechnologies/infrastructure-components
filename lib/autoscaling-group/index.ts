@@ -29,21 +29,13 @@ export class AsgStackWithAlb extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: AsgStackWithAlbProps) {
     super(scope, id);
 
-    // this.albSecurityGroup = new ec2.SecurityGroup(this, 'AlbSecurityGroup', {
-    //   vpc: props.vpc,
-    //   allowAllOutbound: true,
-    //   description: 'Enables SSH Access to asg instances',
-    // });
-
-    // this.albSecurityGroup.addIngressRule(ec2.Peer.ipv4('0.0.0.0/0'), ec2.Port.tcp(80), 'Access from internet');
-
     this.alb = new elbv2.ApplicationLoadBalancer(this, 'LB', {
       vpc: props.vpc,
       internetFacing: true,
       securityGroup: this.albSecurityGroup,
-      // vpcSubnets: {
-      //   subnets: props.vpc.publicSubnets,
-      // },
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PUBLIC,
+      },
     });
 
     const listener = this.alb.addListener('Listener', {
@@ -57,8 +49,6 @@ export class AsgStackWithAlb extends cdk.Construct {
       description: 'Enables SSH Access to asg instances'
     });
 
-    // this.asgSecurityGroup.connections.allowFrom(this.albSecurityGroup, ec2.Port.tcp(props.asgTargetPort || 8080), 'Trafic from alb sg');
-
     this.asg = new autoscaling.AutoScalingGroup(this, 'Asg', {
       vpc: props.vpc,
       instanceType: props.instanceType || ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
@@ -69,10 +59,10 @@ export class AsgStackWithAlb extends cdk.Construct {
       minCapacity: props.minCapacity || 1,
       maxCapacity: props.maxCapacity || 2,
       autoScalingGroupName: props.autoScalingGroupName ? `${props.autoScalingGroupName}-${props.env}` : `${props.projectName}-asg-${props.env}`,
-      // vpcSubnets: {
-      //   subnets: props.vpc.privateSubnets,
-      // }
-      associatePublicIpAddress: true,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE,
+      },
+      associatePublicIpAddress: false,
       keyName: 'stivi-test-ec2-key-pair'
     });
 

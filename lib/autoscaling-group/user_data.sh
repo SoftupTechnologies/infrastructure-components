@@ -8,6 +8,4 @@ sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-c
 
 sudo chmod +x /usr/local/bin/docker-compose
 
-sudo reboot
-
 docker run -p 8080:80 yeasy/simple-web:latest
