@@ -25,12 +25,12 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
 
     const { vpc } = new MyVpc(this, 'MyAwesomeVpc', {
       vpcCidr: '10.0.0.0/16',
-      publicSubnetsNo: 2,
+      publicSubnetsNo: 1,
       maxAzs: 2,
       privateSubnetsNo: 1,
     });
 
-    const { asg } = new AsgStackWithAlb(this, 'MyAsg', {
+    const { asg, alb } = new AsgStackWithAlb(this, 'MyAsg', {
       ...props,
       vpc,
     });
@@ -39,6 +39,11 @@ export class ServerlessInfrastructureCdkStack extends cdk.Stack {
       targetUtilizationPercent: 60,
       cooldown: cdk.Duration.hours(2),
       disableScaleIn: false,
+    });
+
+    new cdk.CfnOutput(this, 'AlbDns', {
+      exportName: 'AlbDns',
+      value: alb.loadBalancerDnsName,
     });
   }
 }

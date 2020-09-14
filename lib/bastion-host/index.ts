@@ -113,7 +113,7 @@ export class BastionHostServices extends cdk.Construct {
     const localPath = this.bastionHostInstance.userData.addS3DownloadCommand({
       bucket: userDataAsset.bucket,
       bucketKey: userDataAsset.s3ObjectKey,
-    })
+    });
 
     this.bastionHostInstance.userData.addExecuteFileCommand({
       filePath: localPath,
