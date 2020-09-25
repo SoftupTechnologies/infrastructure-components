@@ -6,9 +6,8 @@ import { OAuthScope, ProviderAttribute, UserPoolClientIdentityProvider } from '@
 
 interface UserPoolProps {
   projectName: string;
-  productName: string;
   clientName: string;
-  clientUrls: string[];
+  clientAppUrls: string[];
   facebookAppId: string;
   facebookAppSecret: string;
   env: Envs;
@@ -27,14 +26,14 @@ export class UserPoolService extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: UserPoolProps) {
     super(scope, id);
 
-    const { projectName, env, productName, clientUrls, facebookAppId, facebookAppSecret } = props;
+    const { projectName, env, clientAppUrls, facebookAppId, facebookAppSecret } = props;
 
     const userPool = new cognito.UserPool(this, 'UserPoolService', {
       userPoolName: `${projectName}-user-pool-${env}`,
       selfSignUpEnabled: true,
       userVerification: {
-        emailSubject: `Verify your email for ${productName}!`,
-        emailBody: `Hello {username}, Thanks for signing up to ${productName}! Your verification code is {####}`,
+        emailSubject: `Verify your email for ${projectName}!`,
+        emailBody: `Hello {username}, Thanks for signing up to ${projectName}! Your verification code is {####}`,
         emailStyle: cognito.VerificationEmailStyle.CODE,
       },
       signInAliases: {
@@ -79,8 +78,8 @@ export class UserPoolService extends cdk.Construct {
         refreshToken: true,
       },
       oAuth: {
-        callbackUrls: clientUrls,
-        logoutUrls: clientUrls,
+        callbackUrls: clientAppUrls,
+        logoutUrls: clientAppUrls,
         scopes: [OAuthScope.EMAIL, OAuthScope.PROFILE, OAuthScope.OPENID],
         flows: { implicitCodeGrant: true },
       }

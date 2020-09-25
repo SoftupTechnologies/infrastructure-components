@@ -518,6 +518,9 @@ Name | Type | Required | Default | Description
 -----|------|----------|---------|------------
 projectName | string | true | undefined | Project name
 clientName | string | true | undefined | Client name
+clientAppUrls | string | true | undefined| Client App Callback and Logout Urls
+facebookAppId | string | true | undefined| Facebook App Id
+facebookAppSecret | string | true | undefined| Facebook App Secret
 env | Envs { dev, stage, prod } | true | undefined | Environment
 
 #### Properties
